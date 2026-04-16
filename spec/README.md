@@ -67,15 +67,45 @@ Feature specs, command designs, and refactor documentation for the gitmap CLI.
 | 55 | [temp-release.md](01-app/55-temp-release.md) | Temp release |
 | 56 | [unified-gitmap-dir.md](01-app/56-unified-gitmap-dir.md) | Unified .gitmap directory |
 | 57 | [skipmeta-integration-test.md](01-app/57-skipmeta-integration-test.md) | Skip-meta integration test |
-| 58–78 | refactor-*.md | Code refactors (workflow, dispatch, archive, autocommit, SEO, branches, assets, TUI, aliases, ops, status, exec, logs, compress) |
+| 58 | [refactor-workflowfinalize.md](01-app/58-refactor-workflowfinalize.md) | Refactor workflow finalize |
+| 59 | [clone-next.md](01-app/59-clone-next.md) | Clone next versioned iteration |
+| 60 | [help-dashboard.md](01-app/60-help-dashboard.md) | Help dashboard |
+| 61 | [refactor-autocommit.md](01-app/61-refactor-autocommit.md) | Refactor autocommit |
+| 62 | [refactor-seowriteloop.md](01-app/62-refactor-seowriteloop.md) | Refactor SEO write loop |
+| 63 | [refactor-workflowbranch.md](01-app/63-refactor-workflowbranch.md) | Refactor workflow branch |
+| 64 | [refactor-workflow.md](01-app/64-refactor-workflow.md) | Refactor workflow |
+| 65 | [refactor-assets.md](01-app/65-refactor-assets.md) | Refactor assets |
+| 66 | [refactor-zipgroupops.md](01-app/66-refactor-zipgroupops.md) | Refactor zip group ops |
+| 67 | [refactor-tui.md](01-app/67-refactor-tui.md) | Refactor TUI |
+| 68 | [refactor-aliasops.md](01-app/68-refactor-aliasops.md) | Refactor alias ops |
+| 69 | [refactor-tempreleaseops.md](01-app/69-refactor-tempreleaseops.md) | Refactor temp release ops |
+| 70 | [refactor-listreleases.md](01-app/70-refactor-listreleases.md) | Refactor list releases |
+| 71 | [refactor-listversions.md](01-app/71-refactor-listversions.md) | Refactor list versions |
+| 72 | [refactor-sshgen.md](01-app/72-refactor-sshgen.md) | Refactor SSH gen |
+| 73 | [refactor-scanprojects.md](01-app/73-refactor-scanprojects.md) | Refactor scan projects |
+| 74 | [refactor-amendexec.md](01-app/74-refactor-amendexec.md) | Refactor amend exec |
+| 75 | [refactor-status.md](01-app/75-refactor-status.md) | Refactor status |
+| 76 | [refactor-exec.md](01-app/76-refactor-exec.md) | Refactor exec |
+| 77 | [refactor-logs.md](01-app/77-refactor-logs.md) | Refactor logs |
+| 78 | [refactor-compress.md](01-app/78-refactor-compress.md) | Refactor compress |
 | 79 | [task-watch.md](01-app/79-task-watch.md) | Task watch file sync |
 | 80 | [env.md](01-app/80-env.md) | Environment variable management |
 | 81 | [install.md](01-app/81-install.md) | Developer tool installer |
-| 82 | [install-script.md](01-app/94-install-script.md) | One-liner install scripts |
-| 83 | [future-features.md](01-app/82-future-features.md) | Future features (pending) |
+| 82 | [future-features.md](01-app/82-future-features.md) | Future features (pending) |
+| 83 | [install-bootstrap.md](01-app/83-install-bootstrap.md) | Install bootstrap |
 | 84 | [chocolatey-package.md](01-app/84-chocolatey-package.md) | Chocolatey package distribution (research) |
 | 85 | [winget-package.md](01-app/85-winget-package.md) | Winget package distribution (research) |
-| 86 | [86-author-section.md](86-author-section.md) | Author section specification |
+| 86 | [settings-sync.md](01-app/86-settings-sync.md) | Settings sync |
+| 87 | [clone-next-flatten.md](01-app/87-clone-next-flatten.md) | Clone next flatten |
+| 88 | [clone-direct-url.md](01-app/88-clone-direct-url.md) | Clone direct URL |
+| 89 | [update-path-sync.md](01-app/89-update-path-sync.md) | Update path sync |
+| 90 | [refactor-root-dispatch.md](01-app/90-refactor-root-dispatch.md) | Refactor root dispatch |
+| 91 | [refactor-ziparchive.md](01-app/91-refactor-ziparchive.md) | Refactor zip archive |
+| 92 | [release-self.md](01-app/92-release-self.md) | Release self command |
+| 93 | [update-path-recovery.md](01-app/93-update-path-recovery.md) | Update path recovery |
+| 94 | [install-script.md](01-app/94-install-script.md) | One-liner install scripts |
+| 95 | [pending-task-workflow.md](01-app/95-pending-task-workflow.md) | Pending task workflow |
+| 96 | [axios-version-control.md](01-app/96-axios-version-control.md) | Axios version control |
 
 ---
 
