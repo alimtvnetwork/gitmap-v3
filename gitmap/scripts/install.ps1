@@ -82,15 +82,46 @@ function Resolve-Arch([string]$arch) {
 function Resolve-Version([string]$version) {
     if ($version -ne "") { return $version }
 
-    Write-Step "Fetching latest release..."
     $url = "https://api.github.com/repos/$Repo/releases/latest"
+    Write-Step "Fetching latest release..."
+    Write-Step "  URL: $url"
 
     try {
-        $release = Invoke-RestMethod -Uri $url -UseBasicParsing
+        $response = Invoke-WebRequest -Uri $url -UseBasicParsing -ErrorAction Stop
+        $release = $response.Content | ConvertFrom-Json
         return $release.tag_name
     }
     catch {
-        Write-Err "Failed to fetch latest release: $_"
+        $statusCode = "unknown"
+        $body = ""
+
+        if ($_.Exception.Response) {
+            $statusCode = [int]$_.Exception.Response.StatusCode
+            try {
+                $reader = [System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())
+                $body = $reader.ReadToEnd()
+                $reader.Close()
+            }
+            catch {
+                $body = $_.Exception.Message
+            }
+        }
+        else {
+            $body = $_.Exception.Message
+        }
+
+        Write-Err "Failed to fetch latest release"
+        Write-Err "  HTTP $statusCode -- $url"
+        if ($body) {
+            Write-Err "  Response: $body"
+        }
+        Write-Err ""
+        Write-Err "  Possible causes:"
+        Write-Err "    - No published releases in the repository"
+        Write-Err "    - Repository is private (needs authentication)"
+        Write-Err "    - Repository name has changed"
+        Write-Err ""
+        Write-Err "  Try: https://github.com/$Repo/releases"
         exit 1
     }
 }
