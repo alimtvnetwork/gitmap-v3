@@ -231,6 +231,7 @@ A reusable blueprint for CLI self-update: deploy-to-running-location, rename-fir
 | 04 | [build-scripts.md](08-generic-update/04-build-scripts.md) | `run.ps1` / `run.sh` build + deploy |
 | 05 | [handoff-mechanism.md](08-generic-update/05-handoff-mechanism.md) | Copy-and-handoff for Windows |
 | 06 | [cleanup.md](08-generic-update/06-cleanup.md) | Post-update artifact removal |
+| 07 | [console-safe-handoff.md](08-generic-update/07-console-safe-handoff.md) | Prevent async handoff from breaking the console |
 
 Diagram: [`08-generic-update/images/self-update-flow.jpg`](08-generic-update/images/self-update-flow.jpg)
 
