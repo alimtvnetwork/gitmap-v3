@@ -57,8 +57,8 @@
 
 ### Instructions
 
-1. Navigate to `spec/05-coding-guidelines/`.
-2. Read files in **numeric order**.
+1. Navigate to `spec/12-consolidated-guidelines/`.
+2. Read `00-overview.md` first, then files `01-*.md` through `18-*.md` in numeric order.
 3. Each file is self-contained. Treat each as a standalone policy document.
 
 ### After reading, confirm internally
