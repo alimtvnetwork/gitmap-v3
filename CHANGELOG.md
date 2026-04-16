@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.78.0 — (2026-04-16)
+
+### Changed
+
+- Improved install script error diagnostics with full stack trace on GitHub API failures.
+- Standardized lowercase "gitmap" branding in installer banner.
+- Console-safe handoff spec added for self-update pipeline.
+
 ## v2.76.0 — (2026-04-16)
 
 ### Added

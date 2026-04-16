@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v2.78.0",
+    date: "2026-04-16",
+    items: [
+      "Improved install script error diagnostics with full stack trace on GitHub API failures.",
+      "Standardized lowercase \"gitmap\" branding in installer banner.",
+      "Console-safe handoff spec added for self-update pipeline.",
+    ],
+  },
+  {
     version: "v2.76.0",
     date: "2026-04-16",
     items: [
