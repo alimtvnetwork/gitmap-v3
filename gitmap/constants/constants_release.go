@@ -65,6 +65,8 @@ const (
 // Install hint constants (printed after release for gitmap repos).
 const (
 	GitmapRepoPrefix     = "github.com/alimtvnetwork/gitmap-v3"
+	GitmapRepoOwner      = "github.com/alimtvnetwork/"
+	GitmapRepoNamePrefix = "gitmap-v"
 	MsgInstallHintHeader = `
 
   📦 Install gitmap %s
