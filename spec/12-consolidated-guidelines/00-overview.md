@@ -24,6 +24,7 @@ Self-contained guideline documents extracted from `spec/05-coding-guidelines/`, 
 | 16 | [16-cicd.md](16-cicd.md) | CI/CD pipeline patterns |
 | 17 | [17-resilience.md](17-resilience.md) | Resilience and fault tolerance |
 | 18 | [18-configuration.md](18-configuration.md) | Configuration management |
+| 19 | [19-post-install-shell-activation.md](19-post-install-shell-activation.md) | Post-install shell wrapper activation contract |
 
 ## Source Mapping
 

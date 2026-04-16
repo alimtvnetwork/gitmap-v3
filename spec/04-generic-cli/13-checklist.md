@@ -114,8 +114,15 @@ All constraints from `08-code-style.md` apply to every file you write.
 - [ ] For installer scripts, print a post-install summary with version, binary path, install directory, and PATH target/status
 - [ ] Implement `update` command with copy-and-handoff self-update
 - [ ] Implement `update-cleanup` command for artifact removal
+- [ ] Implement post-install shell wrapper per [21-post-install-shell-activation.md](21-post-install-shell-activation.md):
+  - [ ] Add `<TOOL>_WRAPPER` constant + `ShellWrapperMarkerPrefix`/`Suffix` constants
+  - [ ] Create `setup/wrapper.go` with `DetectShell`, `ResolveProfilePath`, `InjectSnippet`, `RemoveSnippet`, `TryInSessionActivate`, `PrintReloadInstruction`
+  - [ ] Wire wrapper injection into `setup` (and installer); attempt in-session activation, fall back to printed reload one-liner
+  - [ ] Add `doctor` check returning `LOADED` / `INSTALLED_BUT_NOT_LOADED` / `NOT_INSTALLED`
+  - [ ] Emit stderr warning from every shell-dependent subcommand when `<TOOL>_WRAPPER` is unset
+  - [ ] Tests: fresh injection, re-injection (no duplicates), marker-based removal, all three `doctor` states
 
-**Verify:** `./run.ps1` builds, deploys, and prints correct version; `./toolname update` works
+**Verify:** `./run.ps1` builds, deploys, and prints correct version; `./toolname update` works; `./toolname setup` activates the wrapper in the current shell (or prints the exact reload command); `./toolname doctor` reports `LOADED`
 
 ---
 
