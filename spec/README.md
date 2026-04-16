@@ -142,6 +142,7 @@ Root-cause analyses and resolution records for production bugs.
 | 25 | [powershell-cd-wrapper-not-loaded.md](02-app-issues/25-powershell-cd-wrapper-not-loaded.md) | PowerShell cd wrapper not loaded |
 | 26 | [docs-site-not-bundled-and-swallowed-errors.md](02-app-issues/26-docs-site-not-bundled-and-swallowed-errors.md) | Docs site not bundled and swallowed errors |
 | 27 | [error-management-file-path-and-missing-file-code-red-rule.md](02-app-issues/27-error-management-file-path-and-missing-file-code-red-rule.md) | Error management file path and missing file code red rule |
+| 28 | [unused-cd-profile-path-lint-failure.md](02-app-issues/28-unused-cd-profile-path-lint-failure.md) | Unused cdProfilePath function lint failure |
 
 ---
 
