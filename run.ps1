@@ -434,6 +434,51 @@ function Test-SourceFiles {
 function Build-Binary {
     param($Config)
 
+    # Step 2b/4: Embed Windows icon + version metadata via go-winres
+    $winresJson = Join-Path $GitMapDir "winres" "winres.json"
+    if (Test-Path $winresJson) {
+        Write-Step "2b/4" "Embedding Windows icon (go-winres)"
+        $goWinres = Get-Command go-winres -ErrorAction SilentlyContinue
+        if (-not $goWinres) {
+            Write-Info "go-winres not found; installing pinned v0.3.3"
+            $installOutput = go install github.com/tc-hib/go-winres@v0.3.3 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warn "go install go-winres failed; binary will have no icon"
+                foreach ($line in $installOutput) {
+                    $text = "$line".Trim()
+                    if ($text.Length -gt 0) { Write-Host "  $text" -ForegroundColor Yellow }
+                }
+            } else {
+                $goWinres = Get-Command go-winres -ErrorAction SilentlyContinue
+            }
+        }
+
+        if ($goWinres) {
+            Push-Location $GitMapDir
+            try {
+                $cleanVersion = "0.0.0.0"
+                $constantsFile = Join-Path $GitMapDir "constants" "constants.go"
+                if (Test-Path $constantsFile) {
+                    $verMatch = Select-String -Path $constantsFile -Pattern 'const\s+Version\s*=\s*"([^"]+)"' | Select-Object -First 1
+                    if ($verMatch) { $cleanVersion = ($verMatch.Matches[0].Groups[1].Value) -replace '^v', '' }
+                }
+                if ([string]::IsNullOrWhiteSpace($cleanVersion)) { $cleanVersion = "0.0.0.0" }
+                $winresOutput = go-winres make --product-version $cleanVersion --file-version $cleanVersion 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warn "go-winres make failed; continuing without embedded icon"
+                    foreach ($line in $winresOutput) {
+                        $text = "$line".Trim()
+                        if ($text.Length -gt 0) { Write-Host "  $text" -ForegroundColor Yellow }
+                    }
+                } else {
+                    Write-Info "Generated rsrc_windows_*.syso (icon + manifest + version)"
+                }
+            } finally {
+                Pop-Location
+            }
+        }
+    }
+
     Write-Step "3/4" "Building $($Config.binaryName)"
     Test-SourceFiles
 
