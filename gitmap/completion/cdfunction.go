@@ -33,16 +33,6 @@ func cdSnippet(shell string) string {
 	}
 }
 
-// cdProfilePath returns the profile path to write the cd function to.
-func cdProfilePath(shell string) string {
-	paths := cdProfilePaths(shell)
-	if len(paths) == 0 {
-		return ""
-	}
-
-	return paths[0]
-}
-
 // cdProfilePaths returns all profile paths to write the cd function to.
 func cdProfilePaths(shell string) []string {
 	switch shell {
