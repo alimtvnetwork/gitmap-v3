@@ -10,7 +10,7 @@ import (
 )
 
 func TestDefaultPowerShellProfilePathsWindows(t *testing.T) {
-	home := filepath.Join(`C:\Users`, "alim")
+	home := filepath.Join(os.TempDir(), "alim")
 	paths := defaultPowerShellProfilePaths(home, "windows")
 	expected := []string{
 		filepath.Join(home, "Documents", "PowerShell", "profile.ps1"),

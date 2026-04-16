@@ -171,21 +171,6 @@ func upsertDirectClone(url, repoName, folderName, absPath string) {
 	}
 }
 
-// promptOrRegisterDesktop handles GitHub Desktop registration.
-func promptOrRegisterDesktop(repoName, absPath string, autoRegister bool) {
-	if autoRegister {
-		registerSingleDesktop(repoName, absPath)
-
-		return
-	}
-
-	fmt.Print(constants.MsgCloneDesktopPrompt)
-	var answer string
-	_, _ = fmt.Scanln(&answer)
-	if strings.ToLower(strings.TrimSpace(answer)) == "y" {
-		registerSingleDesktop(repoName, absPath)
-	}
-}
 
 // registerSingleDesktop registers a single repo with GitHub Desktop.
 func registerSingleDesktop(name, absPath string) {
