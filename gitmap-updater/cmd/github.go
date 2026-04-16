@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -17,7 +18,7 @@ type releaseResponse struct {
 func fetchLatestTag() (string, error) {
 	req, err := http.NewRequest("GET", GitHubAPILatest, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Accept", "application/vnd.github+json")
@@ -25,17 +26,29 @@ func fetchLatestTag() (string, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("network error: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("GitHub API returned HTTP %d", resp.StatusCode)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+
+		return "", fmt.Errorf(
+			"GitHub API returned HTTP %d\n"+
+				"  URL: %s\n"+
+				"  Response: %s\n"+
+				"  Possible causes:\n"+
+				"    - No published releases in the repository\n"+
+				"    - Repository is private (needs authentication)\n"+
+				"    - Repository name has changed\n"+
+				"  Try: https://github.com/%s/releases",
+			resp.StatusCode, GitHubAPILatest, string(body), RepoSlug,
+		)
 	}
 
 	var release releaseResponse
 	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to parse release JSON: %w", err)
 	}
 
 	return release.TagName, nil
