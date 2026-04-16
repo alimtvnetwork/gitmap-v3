@@ -2,11 +2,20 @@
 
 ## v2.78.0 — (2026-04-16)
 
+### Added
+
+- Console-safe handoff spec (`spec/08-generic-update/07-console-safe-handoff.md`) — documents the blocking `cmd.Run()` pattern that prevents terminal detachment during self-update on Windows.
+- Installer banner now displays version number (`gitmap installer v1.0.0`).
+
 ### Changed
 
-- Improved install script error diagnostics with full stack trace on GitHub API failures.
-- Standardized lowercase "gitmap" branding in installer banner.
-- Console-safe handoff spec added for self-update pipeline.
+- `install.ps1`: `Resolve-Version` now prints full HTTP status code, URL, response body, and potential causes on GitHub API failure instead of a generic error.
+- `gitmap-updater/cmd/github.go`: `fetchLatestTag` error output now includes URL, response body, and troubleshooting hints.
+- Standardized lowercase "gitmap" branding across all installer output messages.
+
+### Fixed
+
+- `ShouldPrintInstallHint` now uses case-insensitive matching for GitHub repo URL detection.
 
 ## v2.76.0 — (2026-04-16)
 
