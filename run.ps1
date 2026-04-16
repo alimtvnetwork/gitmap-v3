@@ -456,7 +456,12 @@ function Build-Binary {
         if ($goWinres) {
             Push-Location $GitMapDir
             try {
-                $cleanVersion = "$($Config.version)" -replace '^v', ''
+                $cleanVersion = "0.0.0.0"
+                $constantsFile = Join-Path $GitMapDir "constants" "constants.go"
+                if (Test-Path $constantsFile) {
+                    $verMatch = Select-String -Path $constantsFile -Pattern 'const\s+Version\s*=\s*"([^"]+)"' | Select-Object -First 1
+                    if ($verMatch) { $cleanVersion = ($verMatch.Matches[0].Groups[1].Value) -replace '^v', '' }
+                }
                 if ([string]::IsNullOrWhiteSpace($cleanVersion)) { $cleanVersion = "0.0.0.0" }
                 $winresOutput = go-winres make --product-version $cleanVersion --file-version $cleanVersion 2>&1
                 if ($LASTEXITCODE -ne 0) {
