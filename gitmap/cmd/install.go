@@ -176,7 +176,6 @@ func executeInstall(opts installOptions) {
 		}
 	}
 
-
 	installTool(opts)
 
 	// Sync settings for "npp" but not for "install-npp".

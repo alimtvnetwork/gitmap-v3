@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/user/gitmap/cloner"
 	"github.com/user/gitmap/clonenext"
+	"github.com/user/gitmap/cloner"
 	"github.com/user/gitmap/constants"
 	"github.com/user/gitmap/desktop"
 	"github.com/user/gitmap/model"
@@ -170,7 +170,6 @@ func upsertDirectClone(url, repoName, folderName, absPath string) {
 		fmt.Fprintf(os.Stderr, "  Warning: could not save repo to database: %v\n", upsertErr)
 	}
 }
-
 
 // registerSingleDesktop registers a single repo with GitHub Desktop.
 func registerSingleDesktop(name, absPath string) {

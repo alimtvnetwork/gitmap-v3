@@ -56,11 +56,11 @@ const (
 
 // Stats terminal formatting.
 const (
-	MsgStatsHeader       = "Command Usage Statistics"
-	MsgStatsSeparator    = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	MsgStatsOverallFmt   = "Total: %d executions (%d unique commands) | Success: %d | Fail: %d (%.1f%%) | Avg: %dms\n"
-	MsgStatsColumns      = "COMMAND         RUNS   SUCCESS  FAIL  FAIL%%   AVG(ms)  MIN(ms)  MAX(ms)  LAST USED"
-	MsgStatsRowFmt       = "%-15s %-6d %-8d %-5d %-7.1f %-8d %-8d %-8d %s\n"
-	MsgStatsEmpty        = "No command history found. Run some commands first.\n"
-	ErrStatsQuery        = "failed to query stats: %v"
+	MsgStatsHeader     = "Command Usage Statistics"
+	MsgStatsSeparator  = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	MsgStatsOverallFmt = "Total: %d executions (%d unique commands) | Success: %d | Fail: %d (%.1f%%) | Avg: %dms\n"
+	MsgStatsColumns    = "COMMAND         RUNS   SUCCESS  FAIL  FAIL%%   AVG(ms)  MIN(ms)  MAX(ms)  LAST USED"
+	MsgStatsRowFmt     = "%-15s %-6d %-8d %-5d %-7.1f %-8d %-8d %-8d %s\n"
+	MsgStatsEmpty      = "No command history found. Run some commands first.\n"
+	ErrStatsQuery      = "failed to query stats: %v"
 )

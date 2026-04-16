@@ -33,9 +33,13 @@ const (
 
 // Update error messages.
 const (
-	ErrUpdateExecFind = "Error finding executable: %v\n"
-	ErrUpdateCopyFail = "Error creating update copy: %v\n"
-	ErrUpdateNoRunSH  = "  ✗ run.sh not found at %s — cannot update on this platform without it.\n"
+	ErrUpdateExecFind          = "Error finding executable: %v\n"
+	ErrUpdateCopyFail          = "Error creating update copy: %v\n"
+	ErrUpdateNoRunSH           = "  ✗ run.sh not found at %s — cannot update on this platform without it.\n"
+	ErrUpdateCleanupExecPath   = "Error: could not resolve executable path at active-binary: %v (operation: resolve executable, reason: os.Executable failed)\n"
+	ErrUpdateCleanupConfigRead = "Error: could not read cleanup config at %s: %v (operation: read config, reason: cleanup path resolution unavailable)\n"
+	ErrUpdateCleanupGlob       = "Error: could not enumerate cleanup matches at %s: %v (operation: glob, reason: invalid cleanup pattern)\n"
+	ErrUpdateCleanupRemove     = "Error: could not remove cleanup artifact at %s: %v (operation: remove, reason: file may be locked or missing)\n"
 )
 
 // Unix update messages.
@@ -291,9 +295,9 @@ exit 0
 
 // Set-source-repo messages.
 const (
-	ErrSetSourceRepoNoPath   = "  ✗ set-source-repo requires a path argument\n"
-	ErrSetSourceRepoInvalid  = "  ✗ Invalid source repo path: %s\n"
-	MsgSetSourceRepoDone     = "  ✓ Source repo path saved: %s\n"
+	ErrSetSourceRepoNoPath  = "  ✗ set-source-repo requires a path argument\n"
+	ErrSetSourceRepoInvalid = "  ✗ Invalid source repo path: %s\n"
+	MsgSetSourceRepoDone    = "  ✓ Source repo path saved: %s\n"
 )
 
 // Backup file extension glob.

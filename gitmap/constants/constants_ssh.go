@@ -2,13 +2,13 @@ package constants
 
 // SSH command names.
 const (
-	CmdSSH          = "ssh"
-	SubCmdSSHCat    = "cat"
-	SubCmdSSHList   = "list"
-	SubCmdSSHListS  = "ls"
-	SubCmdSSHDelete = "delete"
+	CmdSSH           = "ssh"
+	SubCmdSSHCat     = "cat"
+	SubCmdSSHList    = "list"
+	SubCmdSSHListS   = "ls"
+	SubCmdSSHDelete  = "delete"
 	SubCmdSSHDeleteS = "rm"
-	SubCmdSSHConfig = "config"
+	SubCmdSSHConfig  = "config"
 )
 
 // SSH table name.

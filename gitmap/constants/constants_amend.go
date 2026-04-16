@@ -35,26 +35,26 @@ const (
 
 // Amend audit directory.
 const (
-	AmendAuditDir       = ".gitmap/amendments"
+	AmendAuditDir        = ".gitmap/amendments"
 	AmendAuditFilePrefix = "amend-"
 )
 
 // Amend terminal messages.
 const (
-	MsgAmendHeader     = "amend: rewriting %d commits from %s..%s (branch: %s)\n"
-	MsgAmendHeaderAll  = "amend: rewriting %d commits on branch: %s\n"
-	MsgAmendAuthor     = "  author: %q -> %q\n"
-	MsgAmendProgress   = "  [%d/%d] %s - %s\n"
-	MsgAmendDone       = "\nDone: %d commits amended\n"
-	MsgAmendAuditFile  = "  Audit log: %s\n"
-	MsgAmendAuditDB    = "  Database:  1 record saved to Amendments table\n"
-	MsgAmendForcePush  = "  Force push: completed\n"
-	MsgAmendWarnPush   = "Warning: Run 'git push --force-with-lease' to update the remote\n"
-	MsgAmendDryHeader  = "amend (dry-run): %d commits would be rewritten\n"
-	MsgAmendDryLine    = "  [%d] %s - %s (author: %s <%s>)\n"
-	MsgAmendDrySkip    = "  No changes applied (dry-run mode)\n"
-	MsgAmendCheckout   = "  Switching to branch: %s\n"
-	MsgAmendReturn     = "  Returning to branch: %s\n"
+	MsgAmendHeader      = "amend: rewriting %d commits from %s..%s (branch: %s)\n"
+	MsgAmendHeaderAll   = "amend: rewriting %d commits on branch: %s\n"
+	MsgAmendAuthor      = "  author: %q -> %q\n"
+	MsgAmendProgress    = "  [%d/%d] %s - %s\n"
+	MsgAmendDone        = "\nDone: %d commits amended\n"
+	MsgAmendAuditFile   = "  Audit log: %s\n"
+	MsgAmendAuditDB     = "  Database:  1 record saved to Amendments table\n"
+	MsgAmendForcePush   = "  Force push: completed\n"
+	MsgAmendWarnPush    = "Warning: Run 'git push --force-with-lease' to update the remote\n"
+	MsgAmendDryHeader   = "amend (dry-run): %d commits would be rewritten\n"
+	MsgAmendDryLine     = "  [%d] %s - %s (author: %s <%s>)\n"
+	MsgAmendDrySkip     = "  No changes applied (dry-run mode)\n"
+	MsgAmendCheckout    = "  Switching to branch: %s\n"
+	MsgAmendReturn      = "  Returning to branch: %s\n"
 	MsgAmendWarnRewrite = "Warning: This rewrites Git history and requires force-push.\n"
 )
 

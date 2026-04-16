@@ -10,7 +10,7 @@ import (
 	"github.com/user/gitmap/config"
 	"github.com/user/gitmap/constants"
 	"github.com/user/gitmap/desktop"
-	
+
 	"github.com/user/gitmap/mapper"
 	"github.com/user/gitmap/model"
 	"github.com/user/gitmap/scanner"

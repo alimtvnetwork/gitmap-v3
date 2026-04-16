@@ -212,4 +212,3 @@ func pullOneRepoTracked(rec model.ScanRecord, prog *cloner.BatchProgress) {
 		prog.FailWithError(rec.RepoName, result.Error)
 	}
 }
-

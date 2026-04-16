@@ -54,12 +54,12 @@ func executeRelease(version, assets, commit, branch, bump, notes, targets string
 		ZipItems:      zipItems,
 		BundleName:    bundleName,
 		Draft:         draft, DryRun: dryRun,
-		Verbose:       verbose,
-		Compress:      compress || cfg.Release.Compress,
-		Checksums:     checksums || cfg.Release.Checksums,
-		Bin:           bin,
-		NoCommit:      noCommit,
-		Yes:           yes,
+		Verbose:   verbose,
+		Compress:  compress || cfg.Release.Compress,
+		Checksums: checksums || cfg.Release.Checksums,
+		Bin:       bin,
+		NoCommit:  noCommit,
+		Yes:       yes,
 	}
 	err := release.Execute(opts)
 	if err != nil {

@@ -11,11 +11,11 @@ const HelpDashboard = "  dashboard (db)      Generate an interactive HTML dashbo
 
 // Dashboard flag descriptions.
 const (
-	FlagDescDashLimit   = "Maximum number of commits to include"
-	FlagDescDashSince   = "Only include commits after this date (YYYY-MM-DD)"
-	FlagDescDashOpen    = "Open the generated dashboard in the default browser"
-	FlagDescNoMerges    = "Exclude merge commits from the output"
-	FlagDescDashOutDir  = "Output directory for dashboard files"
+	FlagDescDashLimit  = "Maximum number of commits to include"
+	FlagDescDashSince  = "Only include commits after this date (YYYY-MM-DD)"
+	FlagDescDashOpen   = "Open the generated dashboard in the default browser"
+	FlagDescNoMerges   = "Exclude merge commits from the output"
+	FlagDescDashOutDir = "Output directory for dashboard files"
 )
 
 // Dashboard output filenames.
@@ -48,8 +48,8 @@ const (
 
 // Dashboard error messages.
 const (
-	ErrDashNotRepo    = "Current directory is not a Git repository."
-	ErrDashWriteJSON  = "Failed to write dashboard JSON at %s: %v (operation: write)\n"
-	ErrDashWriteHTML  = "Failed to write dashboard HTML at %s: %v (operation: write)\n"
-	ErrDashCollect    = "Failed to collect repository data: %v\n"
+	ErrDashNotRepo   = "Current directory is not a Git repository."
+	ErrDashWriteJSON = "Failed to write dashboard JSON at %s: %v (operation: write)\n"
+	ErrDashWriteHTML = "Failed to write dashboard HTML at %s: %v (operation: write)\n"
+	ErrDashCollect   = "Failed to collect repository data: %v\n"
 )
