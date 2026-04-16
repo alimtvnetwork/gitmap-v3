@@ -131,6 +131,17 @@ Root-cause analyses and resolution records for production bugs.
 | 14 | [security-hardening-gosec-fixes.md](02-app-issues/14-security-hardening-gosec-fixes.md) | Security hardening (GoSec fixes) |
 | 15 | [installer-progress-bar-and-binary-detection.md](02-app-issues/15-installer-progress-bar-and-binary-detection.md) | Installer crashes — progress bar & binary detection |
 | 16 | [ci-passthrough-gate-pattern.md](02-app-issues/16-ci-passthrough-gate-pattern.md) | CI passthrough gate pattern |
+| 17 | [go-flag-ordering-silent-drop.md](02-app-issues/17-go-flag-ordering-silent-drop.md) | Go flag ordering silent drop |
+| 18 | [ci-release-branch-cancellation-protection.md](02-app-issues/18-ci-release-branch-cancellation-protection.md) | CI release branch cancellation protection |
+| 19 | [missing-macos-binaries-and-lint-regression.md](02-app-issues/19-missing-macos-binaries-and-lint-regression.md) | Missing macOS binaries and lint regression |
+| 20 | [path-not-available-in-other-shells.md](02-app-issues/20-path-not-available-in-other-shells.md) | PATH not available in other shells |
+| 21 | [pending-task-durability.md](02-app-issues/21-pending-task-durability.md) | Pending task durability |
+| 22 | [installer-path-not-active-after-install.md](02-app-issues/22-installer-path-not-active-after-install.md) | Installer PATH not active after install |
+| 23 | [go-build-copyfile-redeclared.md](02-app-issues/23-go-build-copyfile-redeclared.md) | Go build copyfile redeclared |
+| 24 | [cd-command-does-not-change-shell-directory.md](02-app-issues/24-cd-command-does-not-change-shell-directory.md) | cd command does not change shell directory |
+| 25 | [powershell-cd-wrapper-not-loaded.md](02-app-issues/25-powershell-cd-wrapper-not-loaded.md) | PowerShell cd wrapper not loaded |
+| 26 | [docs-site-not-bundled-and-swallowed-errors.md](02-app-issues/26-docs-site-not-bundled-and-swallowed-errors.md) | Docs site not bundled and swallowed errors |
+| 27 | [error-management-file-path-and-missing-file-code-red-rule.md](02-app-issues/27-error-management-file-path-and-missing-file-code-red-rule.md) | Error management file path and missing file code red rule |
 
 ---
 
