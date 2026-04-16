@@ -18,6 +18,7 @@ export const changelog: ChangelogEntry[] = [
     ],
   },
   {
+    version: "v2.78.0",
     date: "2026-04-16",
     items: [
       "Console-safe handoff spec added — documents blocking `cmd.Run()` pattern to prevent terminal detachment during self-update on Windows.",
