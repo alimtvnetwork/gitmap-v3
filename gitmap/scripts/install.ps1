@@ -512,7 +512,7 @@ function Write-InstallSummary([string]$version, [string]$binPath, [string]$insta
 
 function Main {
     Write-Host ""
-    Write-Host "  gitmap installer" -ForegroundColor White
+    Write-Host "  gitmap installer v1.0.0" -ForegroundColor White
     Write-Host "  github.com/$Repo" -ForegroundColor DarkGray
     Write-Host ""
 
