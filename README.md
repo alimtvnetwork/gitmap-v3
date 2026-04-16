@@ -6,12 +6,12 @@
 
 **Git repository scanner, manager, and navigator CLI**
 
-[![CI](https://github.com/alimtvnetwork/gitmap-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v2/actions/workflows/ci.yml)
-[![golangci-lint](https://github.com/alimtvnetwork/gitmap-v2/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/alimtvnetwork/gitmap-v2/actions/workflows/ci.yml)
-[![Vulncheck](https://github.com/alimtvnetwork/gitmap-v2/actions/workflows/vulncheck.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v2/actions/workflows/vulncheck.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/alimtvnetwork/gitmap-v2?style=flat-square&label=version)](https://github.com/alimtvnetwork/gitmap-v2/releases)
+[![CI](https://github.com/alimtvnetwork/gitmap-v3/actions/workflows/ci.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v3/actions/workflows/ci.yml)
+[![golangci-lint](https://github.com/alimtvnetwork/gitmap-v3/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/alimtvnetwork/gitmap-v3/actions/workflows/ci.yml)
+[![Vulncheck](https://github.com/alimtvnetwork/gitmap-v3/actions/workflows/vulncheck.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v3/actions/workflows/vulncheck.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/alimtvnetwork/gitmap-v3?style=flat-square&label=version)](https://github.com/alimtvnetwork/gitmap-v3/releases)
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](https://github.com/alimtvnetwork/gitmap-v2)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](https://github.com/alimtvnetwork/gitmap-v3)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](./LICENSE)
 
 _Scan, catalog, clone, and manage all your Git repositories from a single CLI._
@@ -26,12 +26,12 @@ _Scan, catalog, clone, and manage all your Git repositories from a single CLI._
 
 ```powershell
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.ps1 | iex
 ```
 
 ```bash
 # Linux / macOS
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.sh | sh
 ```
 
 ### Scan repos and see results
@@ -59,19 +59,19 @@ Every command supports `--help` or `-h` for detailed usage with examples.
 **Windows (PowerShell — full bootstrap, works on any machine):**
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.ps1'))
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.ps1'))
 ```
 
 **Windows (short form, PowerShell 5+):**
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.ps1 | iex
 ```
 
 **Linux / macOS (Bash):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.sh | sh
 ```
 
 ### Installer Options
@@ -97,13 +97,13 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap
 **Specific version install (one-liner):**
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0"
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0"
 ```
 
 **Specific version + custom directory (one-liner):**
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0" -InstallDir "D:\DevTools\gitmap"
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0" -InstallDir "D:\DevTools\gitmap"
 ```
 
 **Custom directory install (downloaded script):**
@@ -121,7 +121,7 @@ irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/script
 **Linux / macOS — specific version:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.sh | sh -s -- --version v2.51.0
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.sh | sh -s -- --version v2.51.0
 ```
 
 > **Tip:** Use `gitmap list-versions` to see all available release versions before pinning.
@@ -129,8 +129,8 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap
 ### Clone & Setup (Development)
 
 ```bash
-git clone https://github.com/alimtvnetwork/gitmap-v2.git
-cd gitmap-v2
+git clone https://github.com/alimtvnetwork/gitmap-v3.git
+cd gitmap-v3
 ./setup.sh
 ```
 
