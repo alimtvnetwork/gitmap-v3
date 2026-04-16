@@ -133,6 +133,7 @@ All constraints from `08-code-style.md` apply to every file you write.
 - [ ] Add unit tests for `formatter` (capture output via `io.Writer`)
 - [ ] Add unit tests for `store` (in-memory SQLite)
 - [ ] Add integration tests under `tests/` for command flag parsing
+- [ ] Add wrapper tests: snippet injection (fresh), re-injection (idempotent), marker-based removal, `doctor` status detection
 - [ ] Verify all tests pass: `go test ./...`
 
 **Verify:** `go test ./...` — zero failures
