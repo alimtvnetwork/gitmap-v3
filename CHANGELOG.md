@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.81.0 — (2026-04-16)
+
+### Fixed
+
+- `go-winres` CI icon size error — Windows `.ico` resources require images ≤256x256 but `icon.png` was 512x512. Created `icon-256.png` (LANCZOS resize) and updated `winres.json` to reference it.
+- Documented root cause and prevention in `spec/08-generic-update/09-winres-icon-constraint.md`.
+
 ## v2.80.0 — (2026-04-16)
 
 ### Added
