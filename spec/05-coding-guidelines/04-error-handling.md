@@ -162,7 +162,7 @@ return fmt.Errorf("config not found")
 
 Generic "file not found" messages without paths are **prohibited by convention**.
 
-See: `spec/02-app-issues/error-management-file-path-and-missing-file-code-red-rule.md`
+See: `spec/02-app-issues/27-error-management-file-path-and-missing-file-code-red-rule.md`
 
 ---
 
