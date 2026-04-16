@@ -19,13 +19,13 @@
     Force architecture (amd64, arm64). Default: auto-detect.
 
 .EXAMPLE
-    irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.ps1 | iex
+    irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.ps1 | iex
 
 .EXAMPLE
     & ./install.ps1 -Version v2.48.0
 
 .NOTES
-    Repository: https://github.com/alimtvnetwork/gitmap-v2
+    Repository: https://github.com/alimtvnetwork/gitmap-v3
 #>
 
 param(
@@ -39,7 +39,7 @@ param(
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
-$Repo = "alimtvnetwork/gitmap-v2"
+$Repo = "alimtvnetwork/gitmap-v3"
 $BinaryName = "gitmap.exe"
 
 # --- Logging helpers ---
@@ -171,7 +171,7 @@ function Install-Binary([string]$zipPath, [string]$installDir) {
     New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
     Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
 
-    # Match exact names OR versioned patterns like gitmap-v2.54.6-windows-amd64.exe
+    # Match exact names OR versioned patterns like gitmap-v3.54.6-windows-amd64.exe
     $candidateNames = @(
         $BinaryName,
         [System.IO.Path]::GetFileNameWithoutExtension($BinaryName),

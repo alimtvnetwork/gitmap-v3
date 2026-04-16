@@ -18,7 +18,7 @@ fi
 # gitmap installer for Linux and macOS
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v2/main/gitmap/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.sh | bash
 #
 # Options:
 #   --version <tag>    Install a specific version (e.g. v2.55.0). Default: latest.
@@ -34,7 +34,7 @@ fi
 
 set -euo pipefail
 
-REPO="alimtvnetwork/gitmap-v2"
+REPO="alimtvnetwork/gitmap-v3"
 BINARY_NAME="gitmap"
 TMP_DIR=""
 PATH_SHELL=""
@@ -253,7 +253,7 @@ install_binary() {
         fi
     fi
 
-    # Priority 3: versioned pattern (e.g. gitmap-v2.55.0-linux-amd64)
+    # Priority 3: versioned pattern (e.g. gitmap-v3.55.0-linux-amd64)
     if [ -z "${binary_path}" ]; then
         candidate="$(find "${extract_dir}" -type f -regex ".*/${BINARY_NAME}-v[0-9][0-9.]*-${os}-${arch}" | head -1)"
         if [ -n "${candidate}" ]; then
