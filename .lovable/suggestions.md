@@ -29,5 +29,5 @@ See `.lovable/memory/suggestions/01-suggestions.md` for the full historical list
 - 🔲 Enhanced `install --list` grouped by category with installed status
 - 🔲 Unit tests for task, env, and install commands
 - 🔲 Update `helptext/env.md` with `--shell` flag usage examples
-- 🔲 Create `spec/12-consolidated-guidelines/` with unified rulebook
+- ✅ Created `spec/12-consolidated-guidelines/` with 18 unified guideline documents (v3.3.0)
 - 🔲 Create `spec/01-spec-authoring-guide/` with spec writing conventions
