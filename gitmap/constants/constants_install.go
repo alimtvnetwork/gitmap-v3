@@ -148,11 +148,11 @@ const (
 
 // Winget package IDs.
 const (
-	WingetPkgVSCode       = "Microsoft.VisualStudioCode"
-	WingetPkgPowerShell   = "Microsoft.PowerShell"
-	WingetPkgDbeaver      = "dbeaver.DBeaverCommunity"
-	WingetPkgOBS          = "OBSProject.OBSStudio"
-	WingetPkgStickyNotes  = "9NBLGGH4QGHW" // Microsoft Sticky Notes Store ID
+	WingetPkgVSCode        = "Microsoft.VisualStudioCode"
+	WingetPkgPowerShell    = "Microsoft.PowerShell"
+	WingetPkgDbeaver       = "dbeaver.DBeaverCommunity"
+	WingetPkgOBS           = "OBSProject.OBSStudio"
+	WingetPkgStickyNotes   = "9NBLGGH4QGHW" // Microsoft Sticky Notes Store ID
 	WingetPkgGitHubDesktop = "GitHub.GitHubDesktop"
 )
 
@@ -266,16 +266,16 @@ const (
 
 // NPP error messages — Code Red: all file errors include exact path and reason.
 const (
-	ErrNppZipNotFound   = "Error: settings zip not found at %s: %v (operation: extract, reason: file does not exist)\n"
-	ErrNppSourceDir     = "Error: settings source directory not found at %s: %v (operation: read, reason: directory does not exist)\n"
-	ErrNppDirCreate     = "Error: failed to create directory %s: %v (operation: mkdir, reason: path is inaccessible)\n"
-	ErrNppExtractEntry  = "Error: failed to open zip entry '%s' for extraction to %s: %v (operation: extract)\n"
-	ErrNppFileCreate    = "Error: failed to create file at %s: %v (operation: write, reason: path is inaccessible)\n"
-	ErrNppFileCopy      = "Error: failed to copy zip entry '%s' to %s: %v (operation: extract)\n"
-	ErrNppFileRead      = "Error: failed to read settings file at %s: %v (operation: read)\n"
-	ErrNppFileWrite     = "Error: failed to write settings file to %s: %v (operation: write)\n"
-	ErrNppWindowsOnly   = "Error: Notepad++ settings sync is only supported on Windows (current OS: %s)\n"
-	ErrNppNoAppData     = "Error: APPDATA environment variable not set (operation: resolve, reason: environment variable not set)\n"
+	ErrNppZipNotFound      = "Error: settings zip not found at %s: %v (operation: extract, reason: file does not exist)\n"
+	ErrNppSourceDir        = "Error: settings source directory not found at %s: %v (operation: read, reason: directory does not exist)\n"
+	ErrNppDirCreate        = "Error: failed to create directory %s: %v (operation: mkdir, reason: path is inaccessible)\n"
+	ErrNppExtractEntry     = "Error: failed to open zip entry '%s' for extraction to %s: %v (operation: extract)\n"
+	ErrNppFileCreate       = "Error: failed to create file at %s: %v (operation: write, reason: path is inaccessible)\n"
+	ErrNppFileCopy         = "Error: failed to copy zip entry '%s' to %s: %v (operation: extract)\n"
+	ErrNppFileRead         = "Error: failed to read settings file at %s: %v (operation: read)\n"
+	ErrNppFileWrite        = "Error: failed to write settings file to %s: %v (operation: write)\n"
+	ErrNppWindowsOnly      = "Error: Notepad++ settings sync is only supported on Windows (current OS: %s)\n"
+	ErrNppNoAppData        = "Error: APPDATA environment variable not set (operation: resolve, reason: environment variable not set)\n"
 	MsgNppSettingsSynced   = "Settings synced to %s\n"
 	MsgNppSettingsFallback = "Settings synced to %s (fallback — zip was missing)\n"
 )

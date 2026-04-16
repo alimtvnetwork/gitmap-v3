@@ -74,16 +74,16 @@ const (
 
 // Env error messages.
 const (
-	ErrEnvNameRequired   = "Variable name is required."
-	ErrEnvValueRequired  = "Variable value is required."
-	ErrEnvPathRequired   = "PATH entry is required."
-	ErrEnvNotFound       = "Variable '%s' is not managed by gitmap.\n"
-	ErrEnvPathNotExist   = "Error: directory does not exist at %s (operation: resolve, reason: file does not exist)\n"
-	ErrEnvInvalidName    = "Invalid variable name: %s (must be alphanumeric and underscore only)\n"
-	ErrEnvProfileWrite   = "Error: failed to write shell profile at %s: %v (operation: write)\n"
-	ErrEnvRegistryLoad   = "Error: failed to load env registry at %s: %v (operation: read)\n"
-	ErrEnvRegistrySave   = "Error: failed to save env registry at %s: %v (operation: write)\n"
-	ErrEnvSubcommand     = "Unknown env subcommand: %s\n"
-	ErrEnvSystemWindows  = "System-level variables require administrator privileges."
-	ErrEnvPathDuplicate  = "PATH entry already exists: %s\n"
+	ErrEnvNameRequired  = "Variable name is required."
+	ErrEnvValueRequired = "Variable value is required."
+	ErrEnvPathRequired  = "PATH entry is required."
+	ErrEnvNotFound      = "Variable '%s' is not managed by gitmap.\n"
+	ErrEnvPathNotExist  = "Error: directory does not exist at %s (operation: resolve, reason: file does not exist)\n"
+	ErrEnvInvalidName   = "Invalid variable name: %s (must be alphanumeric and underscore only)\n"
+	ErrEnvProfileWrite  = "Error: failed to write shell profile at %s: %v (operation: write)\n"
+	ErrEnvRegistryLoad  = "Error: failed to load env registry at %s: %v (operation: read)\n"
+	ErrEnvRegistrySave  = "Error: failed to save env registry at %s: %v (operation: write)\n"
+	ErrEnvSubcommand    = "Unknown env subcommand: %s\n"
+	ErrEnvSystemWindows = "System-level variables require administrator privileges."
+	ErrEnvPathDuplicate = "PATH entry already exists: %s\n"
 )

@@ -62,8 +62,8 @@ const (
 
 // SQL: migrate existing tables to add new columns.
 const (
-	SQLMigratePendingWorkDir  = "ALTER TABLE PendingTask ADD COLUMN WorkingDirectory TEXT DEFAULT ''"
-	SQLMigratePendingCmdArgs  = "ALTER TABLE PendingTask ADD COLUMN CommandArgs TEXT DEFAULT ''"
+	SQLMigratePendingWorkDir   = "ALTER TABLE PendingTask ADD COLUMN WorkingDirectory TEXT DEFAULT ''"
+	SQLMigratePendingCmdArgs   = "ALTER TABLE PendingTask ADD COLUMN CommandArgs TEXT DEFAULT ''"
 	SQLMigrateCompletedWorkDir = "ALTER TABLE CompletedTask ADD COLUMN WorkingDirectory TEXT DEFAULT ''"
 	SQLMigrateCompletedCmdArgs = "ALTER TABLE CompletedTask ADD COLUMN CommandArgs TEXT DEFAULT ''"
 )

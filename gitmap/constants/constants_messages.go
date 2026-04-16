@@ -58,9 +58,9 @@ const (
 
 // Docs command.
 const (
-	DocsURL        = "https://gitmap.dev/docs"
-	MsgDocsOpened  = "  ✓ Opened %s\n"
-	ErrDocsOpen    = "  ✗ Failed to open browser: %v\n"
+	DocsURL       = "https://gitmap.dev/docs"
+	MsgDocsOpened = "  ✓ Opened %s\n"
+	ErrDocsOpen   = "  ✗ Failed to open browser: %v\n"
 )
 
 // Version display.
@@ -147,16 +147,16 @@ const (
 
 // CLI error messages.
 const (
-	ErrSourceRequired         = "Error: source file or URL is required"
-	ErrCloneUsage             = "Usage: gitmap clone <url|source|json|csv|text> [folder] [--target-dir <dir>] [--safe-pull]"
-	ErrShorthandNotFound      = "Error: %s not found.\nRun 'gitmap scan' first to generate output files.\n"
-	ErrConfigLoad             = "Error: failed to load config from %s: %v (operation: read)\n"
-	ErrScanFailed             = "Error: scan failed on directory %s: %v (operation: resolve)\n"
-	ErrCloneFailed            = "Error: clone failed for source file %s: %v (operation: read)\n"
-	ErrOutputFailed           = "Error: output generation failed: %v\n"
-	ErrCreateDir              = "Error: cannot create directory at %s: %v (operation: mkdir)\n"
-	ErrCreateFile             = "Error: cannot create file at %s: %v (operation: write)\n"
-	ErrNoRepoPath = `
+	ErrSourceRequired    = "Error: source file or URL is required"
+	ErrCloneUsage        = "Usage: gitmap clone <url|source|json|csv|text> [folder] [--target-dir <dir>] [--safe-pull]"
+	ErrShorthandNotFound = "Error: %s not found.\nRun 'gitmap scan' first to generate output files.\n"
+	ErrConfigLoad        = "Error: failed to load config from %s: %v (operation: read)\n"
+	ErrScanFailed        = "Error: scan failed on directory %s: %v (operation: resolve)\n"
+	ErrCloneFailed       = "Error: clone failed for source file %s: %v (operation: read)\n"
+	ErrOutputFailed      = "Error: output generation failed: %v\n"
+	ErrCreateDir         = "Error: cannot create directory at %s: %v (operation: mkdir)\n"
+	ErrCreateFile        = "Error: cannot create file at %s: %v (operation: write)\n"
+	ErrNoRepoPath        = `
   ✗ Source repository path not found.
 
   This binary was installed without a linked source repo, so 'update'
@@ -177,31 +177,31 @@ const (
 
   After building from source, 'gitmap update' will work automatically.
 `
-	ErrUpdateFailed           = "Update error: %v\n"
-	ErrPullSlugRequired       = "Error: repo name is required"
-	ErrPullUsage              = "Usage: gitmap pull <repo-name> [--verbose]"
-	ErrPullLoadFailed         = "Error: could not load gitmap.json at %s: %v (operation: read)\n"
-	ErrPullNotFound           = "Error: no repo found matching '%s'\n"
-	ErrPullNotRepo            = "Error: %s is not a git repository\n"
-	ErrRescanNoCache          = "Error: no previous scan found. Run 'gitmap scan' first.\n%v\n"
-	ErrSetupLoadFailed        = "Error: could not load git-setup.json at %s: %v (operation: read)\n"
-	ErrStatusLoadFailed       = "Error: could not load gitmap.json at %s for status: %v (operation: read)\nRun 'gitmap scan' first.\n"
-	ErrExecUsage              = "Usage: gitmap exec <git-args...>\nExample: gitmap exec fetch --prune"
-	ErrExecLoadFailed         = "Error: could not load gitmap.json at %s: %v (operation: read)\nRun 'gitmap scan' first.\n"
-	ErrReleaseVersionRequired = "Error: version is required.\nProvide a version argument, use --bump, or create a version.json file."
-	ErrReleaseUsage           = "Usage: gitmap release [version] [--assets <path>] [--commit <sha>] [--branch <name>] [--bump major|minor|patch] [--draft] [--dry-run]"
-	ErrReleaseBranchUsage     = "Usage: gitmap release-branch <release/vX.Y.Z> [--assets <path>] [--draft]"
-	ErrReleaseAlreadyExists   = "Error: version %s is already released. See .gitmap/release/%s.json for details.\n"
-	ErrReleaseTagExists       = "Error: tag %s already exists.\n"
-	ErrReleaseBranchNotFound  = "Error: branch %s does not exist.\n"
-	ErrReleaseCommitNotFound  = "Error: commit %s not found.\n"
-	ErrReleaseInvalidVersion  = "Error: '%s' is not a valid version.\n"
-	ErrReleaseBumpNoLatest    = "Error: no previous release found. Create an initial release before using --bump.\n"
-	ErrReleaseBumpConflict    = "Error: --bump cannot be used with an explicit version argument.\n"
-	ErrReleaseCommitBranch    = "Error: --commit and --branch are mutually exclusive.\n"
-	ErrReleasePushFailed      = "Error: failed to push to remote: %v\n"
-	ErrReleaseVersionLoad     = "Error: could not read version.json at %s: %v (operation: read)\n"
-	ErrReleaseMetaWrite       = "Error: could not write release metadata at %s: %v (operation: write)\n"
+	ErrUpdateFailed             = "Update error: %v\n"
+	ErrPullSlugRequired         = "Error: repo name is required"
+	ErrPullUsage                = "Usage: gitmap pull <repo-name> [--verbose]"
+	ErrPullLoadFailed           = "Error: could not load gitmap.json at %s: %v (operation: read)\n"
+	ErrPullNotFound             = "Error: no repo found matching '%s'\n"
+	ErrPullNotRepo              = "Error: %s is not a git repository\n"
+	ErrRescanNoCache            = "Error: no previous scan found. Run 'gitmap scan' first.\n%v\n"
+	ErrSetupLoadFailed          = "Error: could not load git-setup.json at %s: %v (operation: read)\n"
+	ErrStatusLoadFailed         = "Error: could not load gitmap.json at %s for status: %v (operation: read)\nRun 'gitmap scan' first.\n"
+	ErrExecUsage                = "Usage: gitmap exec <git-args...>\nExample: gitmap exec fetch --prune"
+	ErrExecLoadFailed           = "Error: could not load gitmap.json at %s: %v (operation: read)\nRun 'gitmap scan' first.\n"
+	ErrReleaseVersionRequired   = "Error: version is required.\nProvide a version argument, use --bump, or create a version.json file."
+	ErrReleaseUsage             = "Usage: gitmap release [version] [--assets <path>] [--commit <sha>] [--branch <name>] [--bump major|minor|patch] [--draft] [--dry-run]"
+	ErrReleaseBranchUsage       = "Usage: gitmap release-branch <release/vX.Y.Z> [--assets <path>] [--draft]"
+	ErrReleaseAlreadyExists     = "Error: version %s is already released. See .gitmap/release/%s.json for details.\n"
+	ErrReleaseTagExists         = "Error: tag %s already exists.\n"
+	ErrReleaseBranchNotFound    = "Error: branch %s does not exist.\n"
+	ErrReleaseCommitNotFound    = "Error: commit %s not found.\n"
+	ErrReleaseInvalidVersion    = "Error: '%s' is not a valid version.\n"
+	ErrReleaseBumpNoLatest      = "Error: no previous release found. Create an initial release before using --bump.\n"
+	ErrReleaseBumpConflict      = "Error: --bump cannot be used with an explicit version argument.\n"
+	ErrReleaseCommitBranch      = "Error: --commit and --branch are mutually exclusive.\n"
+	ErrReleasePushFailed        = "Error: failed to push to remote: %v\n"
+	ErrReleaseVersionLoad       = "Error: could not read version.json at %s: %v (operation: read)\n"
+	ErrReleaseMetaWrite         = "Error: could not write release metadata at %s: %v (operation: write)\n"
 	ErrChangelogRead            = "Error: could not read CHANGELOG.md at %s: %v (operation: read)\n"
 	ErrChangelogVersionNotFound = "Error: version %s not found in CHANGELOG.md\n"
 	ErrChangelogOpen            = "Error: could not open CHANGELOG.md at %s: %v (operation: open)\n"
@@ -233,19 +233,19 @@ const (
 
 // Pending metadata discovery messages.
 const (
-	MsgPendingMetaFound    = "  → Found %d unreleased version(s) from .gitmap/release/ metadata\n"
-	MsgPendingMetaRelease  = "  → Creating release from metadata: %s (commit: %s)\n"
+	MsgPendingMetaFound     = "  → Found %d unreleased version(s) from .gitmap/release/ metadata\n"
+	MsgPendingMetaRelease   = "  → Creating release from metadata: %s (commit: %s)\n"
 	WarnPendingMetaNoCommit = "  ⚠ Skipping %s: commit %s not found in repository\n"
-	WarnPendingMetaNoSHA   = "  ⚠ Skipping %s: no commit SHA in metadata\n"
+	WarnPendingMetaNoSHA    = "  ⚠ Skipping %s: no commit SHA in metadata\n"
 )
 
 // Clear release JSON messages.
 const (
-	MsgClearReleaseDone      = "  ✓ Removed .gitmap/release/%s.json\n"
-	MsgClearReleaseDryRun    = "  [dry-run] Would remove %s\n"
-	ErrClearReleaseUsage     = "Usage: gitmap clear-release-json <version> [--dry-run]\nExample: gitmap clear-release-json v2.20.0"
-	ErrClearReleaseNotFound  = "Error: no release file found for %s\n"
-	ErrClearReleaseFailed    = "Error: could not remove release file at %s: %v (operation: delete)\n"
+	MsgClearReleaseDone     = "  ✓ Removed .gitmap/release/%s.json\n"
+	MsgClearReleaseDryRun   = "  [dry-run] Would remove %s\n"
+	ErrClearReleaseUsage    = "Usage: gitmap clear-release-json <version> [--dry-run]\nExample: gitmap clear-release-json v2.20.0"
+	ErrClearReleaseNotFound = "Error: no release file found for %s\n"
+	ErrClearReleaseFailed   = "Error: could not remove release file at %s: %v (operation: delete)\n"
 )
 
 // Revert messages.
@@ -273,9 +273,9 @@ const (
 
 // Legacy directory migration messages.
 const (
-	MsgMigrated          = "Migrated %s/ -> %s/\n"
-	MsgMergedAndRemoved  = "Merged %s/ into %s/ (%d files copied, %d skipped) and removed legacy folder\n"
-	ErrMigrationFailed   = "Error: failed to migrate directory %s: %v (operation: move, reason: path is inaccessible)\n"
+	MsgMigrated         = "Migrated %s/ -> %s/\n"
+	MsgMergedAndRemoved = "Merged %s/ into %s/ (%d files copied, %d skipped) and removed legacy folder\n"
+	ErrMigrationFailed  = "Error: failed to migrate directory %s: %v (operation: move, reason: path is inaccessible)\n"
 )
 
 // Legacy ID migration messages.
@@ -286,21 +286,21 @@ const (
 
 // Direct URL clone messages.
 const (
-	MsgCloneURLCloning     = "Cloning %s into %s...\n"
-	MsgCloneURLDone        = "Cloned %s successfully.\n"
-	ErrCloneURLFailed      = "Error: clone failed for %s: %v (operation: git-clone)\n"
-	MsgCloneDesktopPrompt  = "Add to GitHub Desktop? (y/n): "
-	ErrCloneURLExists      = "Error: target folder already exists: %s\n"
+	MsgCloneURLCloning    = "Cloning %s into %s...\n"
+	MsgCloneURLDone       = "Cloned %s successfully.\n"
+	ErrCloneURLFailed     = "Error: clone failed for %s: %v (operation: git-clone)\n"
+	MsgCloneDesktopPrompt = "Add to GitHub Desktop? (y/n): "
+	ErrCloneURLExists     = "Error: target folder already exists: %s\n"
 )
 
 // VS Code integration messages.
 const (
-	VSCodeBin              = "code"
-	VSCodeFlagReuseWindow  = "--reuse-window"
-	VSCodeFlagNewWindow    = "--new-window"
-	MsgVSCodeOpening       = "  Opening %s in VS Code...\n"
-	MsgVSCodeOpened        = "  VS Code opened."
-	MsgVSCodeNotFound      = "  VS Code not found on PATH — skipping editor open.\n"
-	ErrVSCodeOpenFailed    = "  Warning: could not open VS Code: %v\n"
-	ErrVSCodeAdminLock     = "  Warning: VS Code may be running as administrator — could not open automatically.\n"
+	VSCodeBin             = "code"
+	VSCodeFlagReuseWindow = "--reuse-window"
+	VSCodeFlagNewWindow   = "--new-window"
+	MsgVSCodeOpening      = "  Opening %s in VS Code...\n"
+	MsgVSCodeOpened       = "  VS Code opened."
+	MsgVSCodeNotFound     = "  VS Code not found on PATH — skipping editor open.\n"
+	ErrVSCodeOpenFailed   = "  Warning: could not open VS Code: %v\n"
+	ErrVSCodeAdminLock    = "  Warning: VS Code may be running as administrator — could not open automatically.\n"
 )

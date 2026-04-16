@@ -21,9 +21,9 @@ const (
 		(Tool, VersionMajor, VersionMinor, VersionPatch, VersionBuild, VersionString, PackageManager, InstallPath, InstalledAt, UpdatedAt)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
 
-	SQLSelectInstalledTool  = `SELECT Id, Tool, VersionMajor, VersionMinor, VersionPatch, VersionBuild, VersionString, PackageManager, InstallPath, InstalledAt, UpdatedAt FROM InstalledTools WHERE Tool = ?`
-	SQLSelectAllInstalled   = `SELECT Id, Tool, VersionMajor, VersionMinor, VersionPatch, VersionBuild, VersionString, PackageManager, InstallPath, InstalledAt, UpdatedAt FROM InstalledTools ORDER BY Tool`
-	SQLDeleteInstalledTool  = `DELETE FROM InstalledTools WHERE Tool = ?`
-	SQLExistsInstalledTool  = `SELECT COUNT(*) FROM InstalledTools WHERE Tool = ?`
-	SQLDropInstalledTools   = `DROP TABLE IF EXISTS InstalledTools`
+	SQLSelectInstalledTool = `SELECT Id, Tool, VersionMajor, VersionMinor, VersionPatch, VersionBuild, VersionString, PackageManager, InstallPath, InstalledAt, UpdatedAt FROM InstalledTools WHERE Tool = ?`
+	SQLSelectAllInstalled  = `SELECT Id, Tool, VersionMajor, VersionMinor, VersionPatch, VersionBuild, VersionString, PackageManager, InstallPath, InstalledAt, UpdatedAt FROM InstalledTools ORDER BY Tool`
+	SQLDeleteInstalledTool = `DELETE FROM InstalledTools WHERE Tool = ?`
+	SQLExistsInstalledTool = `SELECT COUNT(*) FROM InstalledTools WHERE Tool = ?`
+	SQLDropInstalledTools  = `DROP TABLE IF EXISTS InstalledTools`
 )

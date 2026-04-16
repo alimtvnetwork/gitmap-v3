@@ -22,16 +22,16 @@ const (
 
 // Watch display messages.
 const (
-	WatchBannerTop     = "╔══════════════════════════════════════╗"
-	WatchBannerTitle   = "║          gitmap watch                ║"
-	WatchBannerBottom  = "╚══════════════════════════════════════╝"
-	WatchRefreshFmt    = "gitmap watch — refreshing every %ds (Ctrl+C to stop)"
-	WatchLastUpdFmt    = "Last updated: %s"
-	WatchHeaderFmt     = "  %s%-22s %-10s %-16s %-6s %-8s %-6s%s\n"
-	WatchRowFmt        = "  %-22s %s  %-16s %-6s %-8s %s\n"
-	WatchErrorRowFmt   = "  %s%-22s %serror%s\n"
-	WatchSummaryFmt    = "Repos: %d | Dirty: %d | Behind: %d | Stash: %d"
-	WatchStoppedMsg    = "\ngitmap watch stopped."
+	WatchBannerTop    = "╔══════════════════════════════════════╗"
+	WatchBannerTitle  = "║          gitmap watch                ║"
+	WatchBannerBottom = "╚══════════════════════════════════════╝"
+	WatchRefreshFmt   = "gitmap watch — refreshing every %ds (Ctrl+C to stop)"
+	WatchLastUpdFmt   = "Last updated: %s"
+	WatchHeaderFmt    = "  %s%-22s %-10s %-16s %-6s %-8s %-6s%s\n"
+	WatchRowFmt       = "  %-22s %s  %-16s %-6s %-8s %s\n"
+	WatchErrorRowFmt  = "  %s%-22s %serror%s\n"
+	WatchSummaryFmt   = "Repos: %d | Dirty: %d | Behind: %d | Stash: %d"
+	WatchStoppedMsg   = "\ngitmap watch stopped."
 )
 
 // Watch table column headers.

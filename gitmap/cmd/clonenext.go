@@ -287,4 +287,3 @@ func removeFolderWithLockCheck(name, path string) bool {
 
 	return true
 }
-

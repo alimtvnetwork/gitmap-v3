@@ -3,12 +3,13 @@
 // formats, and file extensions live here.
 //
 // Split into focused files:
-//   constants.go          — core defaults, modes, formats, permissions
-//   constants_git.go      — git command and argument strings
-//   constants_cli.go      — CLI command names, help text, flag descriptions
-//   constants_terminal.go — ANSI colors, terminal sections, table headers
-//   constants_messages.go — user-facing messages and error strings
-//   constants_release.go  — release workflow messages and setup sections
+//
+//	constants.go          — core defaults, modes, formats, permissions
+//	constants_git.go      — git command and argument strings
+//	constants_cli.go      — CLI command names, help text, flag descriptions
+//	constants_terminal.go — ANSI colors, terminal sections, table headers
+//	constants_messages.go — user-facing messages and error strings
+//	constants_release.go  — release workflow messages and setup sections
 package constants
 
 // Version.

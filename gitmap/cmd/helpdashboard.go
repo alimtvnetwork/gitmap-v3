@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 	"syscall"
+	"time"
 
 	"github.com/user/gitmap/constants"
 )

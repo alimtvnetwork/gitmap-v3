@@ -195,4 +195,3 @@ func setupSignalHandler() <-chan bool {
 
 	return ch
 }
-

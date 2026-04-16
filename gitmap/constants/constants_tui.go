@@ -116,8 +116,8 @@ const (
 
 // TUI temp-release messages.
 const (
-	TUITREmpty   = "No temp-release branches found. Use 'gitmap tr <count> <pattern>' to create."
-	TUITRHint    = "enter: detail  g: group by prefix  r: refresh"
+	TUITREmpty     = "No temp-release branches found. Use 'gitmap tr <count> <pattern>' to create."
+	TUITRHint      = "enter: detail  g: group by prefix  r: refresh"
 	TUIColTRBranch = "Branch"
 	TUIColTRPrefix = "Prefix"
 	TUIColTRSeq    = "Seq"

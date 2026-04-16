@@ -2,15 +2,15 @@ package constants
 
 // Zip group command names.
 const (
-	CmdZipGroup        = "zip-group"
-	CmdZipGroupShort   = "z"
-	SubCmdZGCreate     = "create"
-	SubCmdZGAdd        = "add"
-	SubCmdZGRemove     = "remove"
-	SubCmdZGList       = "list"
-	SubCmdZGShow       = "show"
-	SubCmdZGDelete     = "delete"
-	SubCmdZGRename     = "rename"
+	CmdZipGroup      = "zip-group"
+	CmdZipGroupShort = "z"
+	SubCmdZGCreate   = "create"
+	SubCmdZGAdd      = "add"
+	SubCmdZGRemove   = "remove"
+	SubCmdZGList     = "list"
+	SubCmdZGShow     = "show"
+	SubCmdZGDelete   = "delete"
+	SubCmdZGRename   = "rename"
 )
 
 // Zip group table names.

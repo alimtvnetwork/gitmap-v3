@@ -56,10 +56,10 @@ const (
 
 // Go structural indicators.
 const (
-	GoCmdDir       = "cmd"
-	GoMainFile     = "main.go"
-	GoSumFile      = "go.sum"
-	CMakeBuildPfx  = "cmake-build-"
+	GoCmdDir      = "cmd"
+	GoMainFile    = "main.go"
+	GoSumFile     = "go.sum"
+	CMakeBuildPfx = "cmake-build-"
 )
 
 // Project query commands.

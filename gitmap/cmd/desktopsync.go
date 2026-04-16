@@ -79,7 +79,7 @@ func syncAll(records []model.ScanRecord) (added, skipped, failed int) {
 type syncResult int
 
 const (
-	syncAdded   syncResult = iota
+	syncAdded syncResult = iota
 	syncSkipped
 	syncFailed
 )

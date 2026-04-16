@@ -2,8 +2,8 @@ package constants
 
 // SEO-write command constants.
 const (
-	CmdSEOWrite      = "seo-write"
-	CmdSEOWriteAlias = "sw"
+	CmdSEOWrite       = "seo-write"
+	CmdSEOWriteAlias  = "sw"
 	CmdCreateTemplate = "ct"
 )
 
@@ -71,20 +71,20 @@ const (
 
 // SEO-write terminal messages.
 const (
-	MsgSEOHeader        = "seo-write: %d commits planned (interval: %d-%ds)\n"
+	MsgSEOHeader          = "seo-write: %d commits planned (interval: %d-%ds)\n"
 	MsgSEOHeaderUnlimited = "seo-write: unlimited commits (interval: %d-%ds)\n"
-	MsgSEOCommit        = "  [%d/%d] ✓ %q → pushed (file: %s)\n"
-	MsgSEOCommitOpen    = "  [%d] ✓ %q → pushed (file: %s)\n"
-	MsgSEORotation      = "  [%d/%d] ↻ rotation: %s (append → commit → revert → commit)\n"
-	MsgSEORotationOpen  = "  [%d] ↻ rotation: %s (append → commit → revert → commit)\n"
-	MsgSEODone          = "  Done: %d commits pushed in %s\n"
-	MsgSEODryTitle      = "  [%d] title: %s\n"
-	MsgSEODryDesc       = "        desc:  %s\n"
-	MsgSEODryAuthor     = "  author: %s\n"
-	MsgSEOCreated       = "Created %s with sample templates\n"
-	MsgSEOSeeded        = "Seeded %d templates into database\n"
-	MsgSEOGraceful      = "\nGraceful shutdown: finishing current commit...\n"
-	MsgSEOWaiting       = "  waiting %ds before next commit...\n"
+	MsgSEOCommit          = "  [%d/%d] ✓ %q → pushed (file: %s)\n"
+	MsgSEOCommitOpen      = "  [%d] ✓ %q → pushed (file: %s)\n"
+	MsgSEORotation        = "  [%d/%d] ↻ rotation: %s (append → commit → revert → commit)\n"
+	MsgSEORotationOpen    = "  [%d] ↻ rotation: %s (append → commit → revert → commit)\n"
+	MsgSEODone            = "  Done: %d commits pushed in %s\n"
+	MsgSEODryTitle        = "  [%d] title: %s\n"
+	MsgSEODryDesc         = "        desc:  %s\n"
+	MsgSEODryAuthor       = "  author: %s\n"
+	MsgSEOCreated         = "Created %s with sample templates\n"
+	MsgSEOSeeded          = "Seeded %d templates into database\n"
+	MsgSEOGraceful        = "\nGraceful shutdown: finishing current commit...\n"
+	MsgSEOWaiting         = "  waiting %ds before next commit...\n"
 )
 
 // SEO-write error messages.
@@ -107,24 +107,24 @@ const (
 
 // SEO-write help text.
 const (
-	HelpSEOWrite      = "  seo-write (sw)      Automated SEO commit scheduler with templates"
-	HelpSEOWriteFlags = "SEO-write flags:"
-	HelpSEOCSV        = "  --csv <path>        CSV file with title,description columns"
-	HelpSEOURL        = "  --url <url>         Website URL to glorify in commit messages (required)"
-	HelpSEOService    = "  --service <name>    Service name for template placeholders"
-	HelpSEOArea       = "  --area <name>       Geographic area for template placeholders"
-	HelpSEOCompany    = "  --company <name>    Company name for template placeholders"
-	HelpSEOPhone      = "  --phone <number>    Phone number for template placeholders"
-	HelpSEOEmail      = "  --email <addr>      Email address for template placeholders"
-	HelpSEOAddress    = "  --address <addr>    Physical address for template placeholders"
-	HelpSEOMaxCommits = "  --max-commits <N>   Stop after N commits (0 = unlimited, default: 0)"
-	HelpSEOInterval   = "  --interval <min-max> Random delay in seconds (default: 60-120)"
-	HelpSEOFilesFlag  = "  --files <glob>      Glob pattern to select files for staging"
-	HelpSEORotate     = "  --rotate-file <f>   File to modify in rotation mode"
-	HelpSEODryRunFlag = "  --dry-run           Preview commit messages without executing"
-	HelpSEOTemplateF  = "  --template <path>   Load templates from a custom JSON file"
-	HelpSEOCreateTpl  = "  --create-template   Generate sample seo-templates.json (alias: ct)"
-	HelpSEOAuthorName = "  --author-name <n>   Git author name for commits"
+	HelpSEOWrite       = "  seo-write (sw)      Automated SEO commit scheduler with templates"
+	HelpSEOWriteFlags  = "SEO-write flags:"
+	HelpSEOCSV         = "  --csv <path>        CSV file with title,description columns"
+	HelpSEOURL         = "  --url <url>         Website URL to glorify in commit messages (required)"
+	HelpSEOService     = "  --service <name>    Service name for template placeholders"
+	HelpSEOArea        = "  --area <name>       Geographic area for template placeholders"
+	HelpSEOCompany     = "  --company <name>    Company name for template placeholders"
+	HelpSEOPhone       = "  --phone <number>    Phone number for template placeholders"
+	HelpSEOEmail       = "  --email <addr>      Email address for template placeholders"
+	HelpSEOAddress     = "  --address <addr>    Physical address for template placeholders"
+	HelpSEOMaxCommits  = "  --max-commits <N>   Stop after N commits (0 = unlimited, default: 0)"
+	HelpSEOInterval    = "  --interval <min-max> Random delay in seconds (default: 60-120)"
+	HelpSEOFilesFlag   = "  --files <glob>      Glob pattern to select files for staging"
+	HelpSEORotate      = "  --rotate-file <f>   File to modify in rotation mode"
+	HelpSEODryRunFlag  = "  --dry-run           Preview commit messages without executing"
+	HelpSEOTemplateF   = "  --template <path>   Load templates from a custom JSON file"
+	HelpSEOCreateTpl   = "  --create-template   Generate sample seo-templates.json (alias: ct)"
+	HelpSEOAuthorName  = "  --author-name <n>   Git author name for commits"
 	HelpSEOAuthorEmail = "  --author-email <e>  Git author email for commits"
 )
 
