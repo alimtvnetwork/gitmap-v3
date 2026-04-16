@@ -9,9 +9,12 @@ export const changelog: ChangelogEntry[] = [
     version: "v2.78.0",
     date: "2026-04-16",
     items: [
-      "Improved install script error diagnostics with full stack trace on GitHub API failures.",
-      "Standardized lowercase \"gitmap\" branding in installer banner.",
-      "Console-safe handoff spec added for self-update pipeline.",
+      "Console-safe handoff spec added — documents blocking `cmd.Run()` pattern to prevent terminal detachment during self-update on Windows.",
+      "Installer banner now displays version number (`gitmap installer v1.0.0`).",
+      "`install.ps1` `Resolve-Version` prints full HTTP status, URL, response body, and potential causes on GitHub API failure.",
+      "`gitmap-updater` `fetchLatestTag` error output now includes URL, response body, and troubleshooting hints.",
+      "Standardized lowercase \"gitmap\" branding across all installer output.",
+      "`ShouldPrintInstallHint` now uses case-insensitive matching for GitHub repo URL detection.",
     ],
   },
   {
