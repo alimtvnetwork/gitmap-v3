@@ -637,6 +637,18 @@ function Deploy-Binary {
 
     Write-Success "Deployed to $appDir"
     Write-Info "Ensure $appDir is on your PATH to run: gitmap"
+
+    # Sync source repo path in DB so "gitmap update" uses this repo location
+    $syncBinary = $destFile
+    if (-not (Test-Path $syncBinary)) { $syncBinary = $BinaryPath }
+    if (Test-Path $syncBinary) {
+        try {
+            & $syncBinary set-source-repo $RepoRoot 2>&1 | Out-Null
+            Write-Info "Source repo path synced to DB: $RepoRoot"
+        } catch {
+            Write-Warn "Could not sync source repo path: $_"
+        }
+    }
 }
 
 # -- Run gitmap ------------------------------------------------
