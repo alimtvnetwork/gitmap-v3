@@ -6,6 +6,13 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v2.82.0",
+    date: "2026-04-16",
+    items: [
+      "Regenerated `package-lock.json` to sync with `package.json` — resolves CI `npm ci` failure caused by missing entries for testing libs, axios, framer-motion, vitest, and other dependencies added without a lockfile refresh.",
+    ],
+  },
+  {
     version: "v2.81.0",
     date: "2026-04-16",
     items: [
