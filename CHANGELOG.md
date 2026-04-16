@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.82.0 — (2026-04-16)
+
+### Fixed
+
+- Regenerated `package-lock.json` to sync with `package.json` — resolves CI `npm ci` failure caused by missing entries for testing libs, axios, framer-motion, vitest, and other dependencies added without a lockfile refresh.
+
 ## v2.81.0 — (2026-04-16)
 
 ### Fixed
