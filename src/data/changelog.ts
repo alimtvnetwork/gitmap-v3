@@ -6,6 +6,14 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v2.81.0",
+    date: "2026-04-16",
+    items: [
+      "`go-winres` CI icon size error fixed — Windows `.ico` resources require images <=256x256 but `icon.png` was 512x512. Created `icon-256.png` and updated `winres.json`.",
+      "Root cause and prevention documented in `spec/08-generic-update/09-winres-icon-constraint.md`.",
+    ],
+  },
+  {
     version: "v2.80.0",
     date: "2026-04-16",
     items: [
