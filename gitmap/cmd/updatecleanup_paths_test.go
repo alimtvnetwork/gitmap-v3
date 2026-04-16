@@ -19,7 +19,11 @@ func TestDeriveDeployAppDir(t *testing.T) {
 
 	for _, tt := range tests {
 		got := deriveDeployAppDir(tt.selfPath)
-		if got != filepath.Clean(tt.want) {
+		want := tt.want
+		if len(want) > 0 {
+			want = filepath.Clean(want)
+		}
+		if got != want {
 			t.Fatalf("deriveDeployAppDir(%q) = %q, want %q", tt.selfPath, got, tt.want)
 		}
 	}
