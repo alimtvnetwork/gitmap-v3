@@ -41,6 +41,7 @@ $ProgressPreference = "SilentlyContinue"
 
 $Repo = "alimtvnetwork/gitmap-v3"
 $BinaryName = "gitmap.exe"
+$InstallerVersion = "1.0.0"
 
 # --- Logging helpers ---
 
