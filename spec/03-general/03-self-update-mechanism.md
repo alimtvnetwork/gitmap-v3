@@ -366,6 +366,7 @@ tool-agnostic specs provide detailed breakdowns of each mechanism:
 | Build scripts | [04-build-scripts.md](../08-generic-update/04-build-scripts.md) | `run.ps1` / `run.sh` pipeline (pull → deps → build → deploy), config loading, ldflags |
 | Handoff mechanism | [05-handoff-mechanism.md](../08-generic-update/05-handoff-mechanism.md) | Copy-and-handoff flow, worker launch, UTF-8 BOM, binary-based handoff (standalone updater) |
 | Cleanup | [06-cleanup.md](../08-generic-update/06-cleanup.md) | Artifact inventory, `update-cleanup` command, `.old` lifecycle, auto vs manual cleanup |
+| Repo path sync | [08-repo-path-sync.md](../08-generic-update/08-repo-path-sync.md) | Post-deploy DB sync of source repo path via `set-source-repo` command |
 
 ### Mapping: This Document → Generic Specs
 
