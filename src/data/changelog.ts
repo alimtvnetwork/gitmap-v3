@@ -6,7 +6,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
-    version: "v2.78.0",
+    version: "v2.80.0",
+    date: "2026-04-16",
+    items: [
+      "Hidden `set-source-repo` command — persists source repo path to DB so `gitmap update` always uses the correct location after repo moves.",
+      "Post-deploy repo path sync in `run.ps1` — automatically calls `set-source-repo` after every successful deploy.",
+      "Repo path sync spec (`spec/08-generic-update/08-repo-path-sync.md`) — documents the post-deploy sync pattern for AI implementers.",
+      "Help file added for `set-source-repo` command.",
+      "`go-winres` CI failure fixed — moved `winres.json` to `gitmap/winres/` where `go-winres make` expects it.",
+      "Cross-references updated in self-update orchestration and mechanism specs.",
+    ],
+  },
+  {
     date: "2026-04-16",
     items: [
       "Console-safe handoff spec added — documents blocking `cmd.Run()` pattern to prevent terminal detachment during self-update on Windows.",

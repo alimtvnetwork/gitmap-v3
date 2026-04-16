@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.80.0 — (2026-04-16)
+
+### Added
+
+- Hidden `set-source-repo` command — persists source repo path to DB so `gitmap update` always uses the correct location after repo moves.
+- Post-deploy repo path sync in `run.ps1` — automatically calls `set-source-repo` after every successful deploy to keep the DB current.
+- Repo path sync spec (`spec/08-generic-update/08-repo-path-sync.md`) — documents the post-deploy sync pattern for AI implementers.
+- Help file for `set-source-repo` command (`gitmap/helptext/set-source-repo.md`).
+
+### Fixed
+
+- `go-winres` CI failure — moved `winres.json` from `gitmap/` to `gitmap/winres/` where `go-winres make` expects it.
+
+### Changed
+
+- Cross-references updated in `02f-self-update-orchestration.md` and `03-self-update-mechanism.md` to include repo path sync spec.
+
 ## v2.78.0 — (2026-04-16)
 
 ### Added
