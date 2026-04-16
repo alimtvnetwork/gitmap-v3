@@ -25,13 +25,51 @@ func ShouldPrintInstallHint(remoteURL string) bool {
 		return false
 	}
 
+	normalized := normalizeInstallHintRemoteURL(remoteURL)
+	repoName := extractInstallHintRepoName(normalized)
+
+	return isVersionedGitmapRepo(repoName)
+}
+
+func normalizeInstallHintRemoteURL(remoteURL string) string {
 	normalized := strings.TrimSuffix(strings.ToLower(remoteURL), ".git")
-	// Normalize SSH URLs: "git@github.com:org/repo" → "github.com/org/repo"
 	if idx := strings.Index(normalized, "@"); idx >= 0 {
-		normalized = strings.Replace(normalized[idx+1:], ":", "/", 1)
+		return strings.Replace(normalized[idx+1:], ":", "/", 1)
 	}
 
-	prefix := strings.TrimSuffix(strings.ToLower(constants.GitmapRepoPrefix), ".git")
+	return normalized
+}
 
-	return strings.Contains(normalized, prefix)
+func extractInstallHintRepoName(normalized string) string {
+	idx := strings.Index(normalized, constants.GitmapRepoOwner)
+	if idx < 0 {
+		return ""
+	}
+
+	tail := normalized[idx+len(constants.GitmapRepoOwner):]
+	parts := strings.SplitN(tail, "/", 2)
+
+	return parts[0]
+}
+
+func isVersionedGitmapRepo(repoName string) bool {
+	if !strings.HasPrefix(repoName, constants.GitmapRepoNamePrefix) {
+		return false
+	}
+
+	return isNumericString(strings.TrimPrefix(repoName, constants.GitmapRepoNamePrefix))
+}
+
+func isNumericString(value string) bool {
+	if len(value) == 0 {
+		return false
+	}
+
+	for _, ch := range value {
+		if ch < '0' || ch > '9' {
+			return false
+		}
+	}
+
+	return true
 }
