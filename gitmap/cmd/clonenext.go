@@ -126,6 +126,9 @@ func runCloneNext(args []string) {
 
 	// Set GITMAP_SHELL_HANDOFF for the shell wrapper to cd into the new folder.
 	os.Setenv("GITMAP_SHELL_HANDOFF", targetPath)
+
+	// Open in VS Code if available.
+	openInVSCode(targetPath)
 }
 
 // extractRepoName extracts the repository name from a remote URL.
