@@ -12,7 +12,7 @@
 package constants
 
 // Version.
-const Version = "2.82.0"
+const Version = "2.83.0"
 
 // RepoPath is set at build time via -ldflags.
 var RepoPath = ""
@@ -75,6 +75,7 @@ const (
 	DefaultScanCacheFile        = "last-scan.json"
 	DefaultConfigPath           = "./data/config.json"
 	DefaultSetupConfigPath      = "./data/git-setup.json"
+	DefaultBuildOutput          = "./bin"
 	DefaultOutputDir            = ".gitmap/output"
 	DefaultOutputFolder         = "output"
 	DefaultBranch               = "main"

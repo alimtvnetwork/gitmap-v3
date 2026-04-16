@@ -76,6 +76,7 @@ const (
 	GoVersionArg         = "version"
 	PowershellConfigFile = "powershell.json"
 	JSONKeyDeployPath    = "deployPath"
+	JSONKeyBuildOutput   = "buildOutput"
 	JSONKeyBinaryName    = "binaryName"
 	BackupSuffix         = ".old"
 	GitMapSubdir         = "gitmap"

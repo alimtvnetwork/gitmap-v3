@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.83.0 — (2026-04-16)
+
+### Fixed
+
+- `gitmap update-cleanup` now scans the active PATH directory, the PATH-derived deploy directory, the configured deploy directory, and the repo build output directory so stale `.old` backups are removed even when `powershell.json` points to an older location.
+- `gitmap update-cleanup` now removes leftover `gitmap-update-*` artifacts from deploy/build locations in addition to `%TEMP%`, preventing handoff files from being left behind after update flows that switch between deploy targets.
+
 ## v2.82.0 — (2026-04-16)
 
 ### Fixed
