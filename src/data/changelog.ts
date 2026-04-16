@@ -14,6 +14,7 @@ export const changelog: ChangelogEntry[] = [
     ],
   },
   {
+    version: "v2.80.0",
     date: "2026-04-16",
     items: [
       "Hidden `set-source-repo` command — persists source repo path to DB so `gitmap update` always uses the correct location after repo moves.",
