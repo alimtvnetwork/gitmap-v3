@@ -74,6 +74,7 @@ const (
 	CmdDoPendingAlias        = "dp"
 	CmdLLMDocs               = "llm-docs"
 	CmdLLMDocsAlias          = "ld"
+	CmdSetSourceRepo         = "set-source-repo"
 )
 
 // Clone shorthands.

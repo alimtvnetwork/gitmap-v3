@@ -38,4 +38,5 @@ When a CLI updates itself from a PATH-managed executable, use a two-phase handof
 
 - Generic spec: [05-handoff-mechanism.md](../08-generic-update/05-handoff-mechanism.md) §Solution: Copy-and-Handoff
 - Generic spec: [06-cleanup.md](../08-generic-update/06-cleanup.md) §Cleanup Command
+- Generic spec: [08-repo-path-sync.md](../08-generic-update/08-repo-path-sync.md) §Post-Deploy Repo Path Sync
 - Self-update mechanism: [03-self-update-mechanism.md](03-self-update-mechanism.md)

@@ -77,6 +77,11 @@ func dispatchUtility(command string) bool {
 
 		return true
 	}
+	if command == constants.CmdSetSourceRepo {
+		runSetSourceRepo()
+
+		return true
+	}
 
 	return false
 }

@@ -289,6 +289,13 @@ exit 0
 `
 )
 
+// Set-source-repo messages.
+const (
+	ErrSetSourceRepoNoPath   = "  ✗ set-source-repo requires a path argument\n"
+	ErrSetSourceRepoInvalid  = "  ✗ Invalid source repo path: %s\n"
+	MsgSetSourceRepoDone     = "  ✓ Source repo path saved: %s\n"
+)
+
 // Backup file extension glob.
 const OldBackupGlob = "*.old"
 
