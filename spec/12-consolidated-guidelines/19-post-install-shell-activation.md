@@ -1,6 +1,12 @@
 # Post-Install Shell Activation
 
-> **Source:** Consolidated from [spec/04-generic-cli/21-post-install-shell-activation.md](../04-generic-cli/21-post-install-shell-activation.md).
+> **Source:** Consolidated from the split spec under [spec/04-generic-cli/21-post-install-shell-activation/](../04-generic-cli/21-post-install-shell-activation/):
+> - [01-contract.md](../04-generic-cli/21-post-install-shell-activation/01-contract.md) — Required behaviours, activation flow, shell detection, stderr warnings.
+> - [02-snippets.md](../04-generic-cli/21-post-install-shell-activation/02-snippets.md) — Per-shell profile snippet bodies and parity table.
+> - [03-doctor.md](../04-generic-cli/21-post-install-shell-activation/03-doctor.md) — `doctor` three-state detection and implementation checklist.
+> - [04-idempotency.md](../04-generic-cli/21-post-install-shell-activation/04-idempotency.md) — Rewrite, removal, version-bump, and testing rules.
+> - Index: [spec/04-generic-cli/21-post-install-shell-activation.md](../04-generic-cli/21-post-install-shell-activation.md)
+>
 > **Applies to:** Every CLI in this framework that ships shell-integrated subcommands (e.g., `cd`, `clone-next`, `go`).
 
 ## Purpose
@@ -137,4 +143,4 @@ The warning MUST include both the setup action and the reload step.
 | In-session activation | ✅ dot-source | ❌ (print one-liner) | ❌ (print one-liner) | ❌ (print one-liner) |
 | Reload one-liner | `. $PROFILE` | `source ~/.bashrc` | `source ~/.zshrc` | `source ~/.config/fish/config.fish` |
 
-See [spec/04-generic-cli/21-post-install-shell-activation.md](../04-generic-cli/21-post-install-shell-activation.md) for the full rationale, activation flow diagram, and historical bug references.
+See the split sub-files linked at the top — [01-contract](../04-generic-cli/21-post-install-shell-activation/01-contract.md), [02-snippets](../04-generic-cli/21-post-install-shell-activation/02-snippets.md), [03-doctor](../04-generic-cli/21-post-install-shell-activation/03-doctor.md), [04-idempotency](../04-generic-cli/21-post-install-shell-activation/04-idempotency.md) — for full rationale, activation flow diagram, and historical bug references.
