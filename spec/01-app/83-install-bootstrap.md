@@ -68,11 +68,11 @@ $env:GITMAP_VERSION = "v2.25.0"; Set-ExecutionPolicy Bypass -Scope Process -Forc
   PowerShell process — it does not modify machine or user policy.
 - The `-bor 3072` is additive — it does not remove existing protocols.
 - The downloaded script is executed in memory and is subject to the same
-  checksum verification documented in `82-install-script.md`.
+  checksum verification documented in `94-install-script.md`.
 
 ---
 
 ## Related
 
-- [Install Scripts](82-install-script.md) — full installer spec
+- [Install Scripts](94-install-script.md) — full installer spec
 - [Build & Deploy](09-build-deploy.md)

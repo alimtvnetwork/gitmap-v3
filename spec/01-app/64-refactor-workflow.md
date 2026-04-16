@@ -110,7 +110,7 @@ No circular dependencies. All calls are within the same package.
 **Same package (`release/`) refactors:**
 
 - [58-refactor-workflowfinalize.md](58-refactor-workflowfinalize.md) — pipeline, metadata, zip, GitHub upload
-- [60-refactor-ziparchive.md](60-refactor-ziparchive.md) — zip I/O, dry-run, archive building
+- [91-refactor-ziparchive.md](91-refactor-ziparchive.md) — zip I/O, dry-run, archive building
 - [61-refactor-autocommit.md](61-refactor-autocommit.md) — auto-commit, git operations
 - [63-refactor-workflowbranch.md](63-refactor-workflowbranch.md) — branch workflow, pending releases
 - [65-refactor-assets.md](65-refactor-assets.md) — cross-compilation, build helpers

@@ -207,6 +207,6 @@ are treated as the canonical source.
 
 ## Related
 
-- `spec/01-app/82-install-script.md` -- installer specification
+- `spec/01-app/94-install-script.md` -- installer specification
 - `spec/02-app-issues/22-installer-path-not-active-after-install.md` -- PATH fixes
 - `gitmap/helptext/install.md` -- CLI help text

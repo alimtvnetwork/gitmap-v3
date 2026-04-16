@@ -133,6 +133,6 @@ command that the user can copy-paste immediately.
 ## Related
 
 - `spec/02-app-issues/20-path-not-available-in-other-shells.md` — cross-shell visibility (superseded)
-- `spec/01-app/82-install-script.md` — installer specification
+- `spec/01-app/94-install-script.md` — installer specification
 - `gitmap/scripts/install.sh` — Unix implementation
 - `gitmap/scripts/install.ps1` — Windows implementation
