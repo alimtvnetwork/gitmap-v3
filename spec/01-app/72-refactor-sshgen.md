@@ -41,7 +41,7 @@ Imports: `os`, `os/exec`, `path/filepath`, `strings`, `constants`
 
 **Same package (`cmd/`) refactors:**
 
-- [59-refactor-root-dispatch.md](59-refactor-root-dispatch.md) — dispatch splitting
+- [90-refactor-root-dispatch.md](90-refactor-root-dispatch.md) — dispatch splitting
 - [62-refactor-seowriteloop.md](62-refactor-seowriteloop.md) — SEO write loop, git ops
 - [66-refactor-zipgroupops.md](66-refactor-zipgroupops.md) — zip group CRUD and display
 - [68-refactor-aliasops.md](68-refactor-aliasops.md) — alias CRUD and suggest

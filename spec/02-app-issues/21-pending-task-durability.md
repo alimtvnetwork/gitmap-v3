@@ -40,4 +40,4 @@ if err == nil {
 
 ## Related
 
-- `spec/01-app/83-pending-task-workflow.md` — Full specification.
+- `spec/01-app/95-pending-task-workflow.md` — Full specification.

@@ -42,7 +42,7 @@ Imports: `fmt`, `os`, `path/filepath`, `constants`, `model`, `store`
 
 **Same package (`cmd/`) refactors:**
 
-- [59-refactor-root-dispatch.md](59-refactor-root-dispatch.md) — dispatch splitting
+- [90-refactor-root-dispatch.md](90-refactor-root-dispatch.md) — dispatch splitting
 - [62-refactor-seowriteloop.md](62-refactor-seowriteloop.md) — SEO write loop, git ops
 - [68-refactor-aliasops.md](68-refactor-aliasops.md) — alias CRUD and suggest
 - [69-refactor-tempreleaseops.md](69-refactor-tempreleaseops.md) — temp release branch ops
