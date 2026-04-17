@@ -299,6 +299,42 @@ install_binary() {
     ok "Installed ${BINARY_NAME} to ${install_dir}"
 }
 
+# ── Download and extract docs-site.zip release asset ───────────────
+# Required for `gitmap help-dashboard` (hd). Best-effort: skip silently
+# if the release does not bundle docs-site.zip (older versions).
+install_docs_site() {
+    local version="$1" install_dir="$2"
+    local asset_name="docs-site.zip"
+    local asset_url="https://github.com/${REPO}/releases/download/${version}/${asset_name}"
+    local tmp_zip="${TMP_DIR}/${asset_name}"
+
+    step "Downloading docs-site.zip (${version})..."
+
+    if ! download "${asset_url}" "${tmp_zip}" 2>/dev/null; then
+        step "  docs-site.zip not available for ${version} - skipping (gitmap hd may not work)"
+        rm -f "${tmp_zip}" 2>/dev/null || true
+        return 0
+    fi
+
+    # Remove any existing docs-site/ before extracting fresh.
+    rm -rf "${install_dir}/docs-site" 2>/dev/null || true
+
+    if ! command -v unzip >/dev/null 2>&1; then
+        err "unzip not found - cannot extract docs-site.zip (install unzip and re-run)"
+        rm -f "${tmp_zip}" 2>/dev/null || true
+        return 0
+    fi
+
+    # The zip's internal layout is docs-site/dist/... so it extracts directly.
+    if unzip -qo "${tmp_zip}" -d "${install_dir}"; then
+        ok "Installed docs-site to ${install_dir}/docs-site"
+    else
+        err "Failed to extract docs-site.zip"
+    fi
+
+    rm -f "${tmp_zip}" 2>/dev/null || true
+}
+
 # ── Add to PATH ────────────────────────────────────────────────────
 
 # add_path_to_profile writes an export line to a single profile file (idempotent).
