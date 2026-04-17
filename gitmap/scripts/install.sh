@@ -573,6 +573,9 @@ main() {
 
     install_binary "${archive_path}" "${install_dir}" "${os}" "${arch}" "${version}"
 
+    # Bundle the docs site so `gitmap help-dashboard` works after install.
+    install_docs_site "${version}" "${install_dir}"
+
     if [ "${NO_PATH}" = false ]; then
         add_to_path "${install_dir}"
     fi
