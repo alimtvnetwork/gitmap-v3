@@ -541,6 +541,46 @@ function Copy-DataFolder {
     }
 }
 
+# -- Copy docs-site to deploy directory -----------------------
+# Required for `gitmap help-dashboard` (hd) which resolves docs-site/
+# relative to the binary directory. Without this, `gitmap hd` fails with:
+#   "Docs site directory not found at <deploy>/docs-site"
+function Copy-DocsSite {
+    param($AppDir)
+
+    $docsSource = Join-Path $RepoRoot "docs-site"
+    $docsDest   = Join-Path $AppDir "docs-site"
+
+    if (-not (Test-Path $docsSource)) {
+        Write-Warn "docs-site not found at $docsSource - 'gitmap hd' will fail"
+        return
+    }
+
+    # Prefer copying only dist/ if it exists (smaller, no node_modules).
+    $distSource = Join-Path $docsSource "dist"
+    if (Test-Path $distSource) {
+        $distDest = Join-Path $docsDest "dist"
+        if (Test-Path $distDest) {
+            Remove-Item $distDest -Recurse -Force
+        }
+        New-Item -ItemType Directory -Path $docsDest -Force | Out-Null
+        Copy-Item $distSource $distDest -Recurse
+        Write-Info "Copied docs-site/dist to gitmap app directory"
+        return
+    }
+
+    # No prebuilt dist/ — copy the whole docs-site/ for npm-dev fallback,
+    # excluding node_modules to keep the deploy lean.
+    if (Test-Path $docsDest) {
+        Remove-Item $docsDest -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $docsDest -Force | Out-Null
+    Get-ChildItem -Path $docsSource -Force | Where-Object { $_.Name -ne "node_modules" } | ForEach-Object {
+        Copy-Item $_.FullName -Destination $docsDest -Recurse -Force
+    }
+    Write-Warn "docs-site/dist not found - copied source only (run 'npm run build' in docs-site/ for static mode)"
+}
+
 # -- Resolve deploy target -------------------------------------
 # Priority: 1) -DeployPath flag  2) globally installed gitmap location  3) powershell.json default
 function Resolve-DeployTarget {
@@ -679,6 +719,8 @@ function Deploy-Binary {
         Copy-Item $dataDir $dataDest -Recurse
         Write-Info "Copied data folder to gitmap app directory"
     }
+
+    Copy-DocsSite -AppDir $appDir
 
     Write-Success "Deployed to $appDir"
     Write-Info "Ensure $appDir is on your PATH to run: gitmap"
