@@ -396,6 +396,38 @@ copy_data_folder() {
     fi
 }
 
+# -- Copy docs-site to deploy directory -----------------------
+# Required for `gitmap help-dashboard` (hd) which resolves docs-site/
+# relative to the binary directory. Without this, `gitmap hd` fails with:
+#   "Docs site directory not found at <deploy>/docs-site"
+copy_docs_site() {
+    local app_dir="$1"
+    local docs_source="$REPO_ROOT/docs-site"
+    local docs_dest="$app_dir/docs-site"
+
+    if [[ ! -d "$docs_source" ]]; then
+        write_warn "docs-site not found at $docs_source - 'gitmap hd' will fail"
+        return
+    fi
+
+    # Prefer copying only dist/ if it exists (smaller, no node_modules).
+    local dist_source="$docs_source/dist"
+    if [[ -d "$dist_source" ]]; then
+        local dist_dest="$docs_dest/dist"
+        rm -rf "$dist_dest"
+        mkdir -p "$docs_dest"
+        cp -r "$dist_source" "$dist_dest"
+        write_info "Copied docs-site/dist to gitmap app directory"
+        return
+    fi
+
+    # No prebuilt dist/ — copy source (minus node_modules) for npm-dev fallback.
+    rm -rf "$docs_dest"
+    mkdir -p "$docs_dest"
+    (cd "$docs_source" && find . -mindepth 1 -maxdepth 1 ! -name 'node_modules' -exec cp -r {} "$docs_dest/" \;)
+    write_warn "docs-site/dist not found - copied source only (run 'npm run build' in docs-site/ for static mode)"
+}
+
 # -- Resolve deploy target -------------------------------------
 # Priority: 1) --deploy-path flag  2) globally installed gitmap location  3) powershell.json default
 resolve_deploy_target() {
@@ -515,6 +547,8 @@ deploy_binary() {
         cp -r "$data_dir" "$data_dest"
         write_info "Copied data folder to gitmap app directory"
     fi
+
+    copy_docs_site "$app_dir"
 
     write_success "Deployed to $app_dir"
     write_info "Ensure $app_dir is on your PATH to run: gitmap"

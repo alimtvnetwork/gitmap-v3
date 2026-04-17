@@ -249,6 +249,44 @@ function Install-Binary([string]$zipPath, [string]$installDir) {
     Write-OK "Installed $BinaryName to $installDir"
 }
 
+# --- Download and extract docs-site.zip release asset ---
+# Required for `gitmap help-dashboard` (hd). Best-effort: skip silently
+# if the release does not bundle docs-site.zip (older versions).
+function Install-DocsSite([string]$version, [string]$installDir) {
+    $assetName = "docs-site.zip"
+    $assetUrl = "https://github.com/$Repo/releases/download/$version/$assetName"
+    $tmpZip = Join-Path $env:TEMP "gitmap-docs-site-$(Get-Random).zip"
+
+    Write-Step "Downloading docs-site.zip ($version)..."
+
+    try {
+        Invoke-WebRequest -Uri $assetUrl -OutFile $tmpZip -UseBasicParsing -ErrorAction Stop
+    }
+    catch {
+        Write-Step "  docs-site.zip not available for $version - skipping (gitmap hd may not work)"
+        Remove-Item $tmpZip -Force -ErrorAction SilentlyContinue
+        return
+    }
+
+    # Remove any existing docs-site/ before extracting fresh.
+    $docsDir = Join-Path $installDir "docs-site"
+    if (Test-Path $docsDir) {
+        Remove-Item $docsDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    try {
+        # The zip's internal layout is docs-site/dist/... so it extracts directly.
+        Expand-Archive -Path $tmpZip -DestinationPath $installDir -Force
+        Write-OK "Installed docs-site to $docsDir"
+    }
+    catch {
+        Write-Err "Failed to extract docs-site.zip: $_"
+    }
+    finally {
+        Remove-Item $tmpZip -Force -ErrorAction SilentlyContinue
+    }
+}
+
 # --- Add to PATH ---
 
 function Test-PathEntry([string]$pathValue, [string]$dir) {
@@ -530,6 +568,9 @@ function Main {
         finally {
             Remove-Item $result.TmpDir -Recurse -Force -ErrorAction SilentlyContinue
         }
+
+        # Bundle the docs site so `gitmap help-dashboard` works after install.
+        Install-DocsSite $resolvedVersion $resolvedDir
 
         $pathResult = @{ Target = "-NoPath"; Status = "skipped" }
         if (-not $NoPath) {
