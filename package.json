@@ -88,5 +88,15 @@
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "string-width-cjs": "npm:string-width@4.2.3",
+    "strip-ansi-cjs": "npm:strip-ansi@6.0.1",
+    "wrap-ansi-cjs": "npm:wrap-ansi@7.0.0"
+  },
+  "resolutions": {
+    "string-width-cjs": "npm:string-width@4.2.3",
+    "strip-ansi-cjs": "npm:strip-ansi@6.0.1",
+    "wrap-ansi-cjs": "npm:wrap-ansi@7.0.0"
   }
 }
