@@ -442,9 +442,20 @@ function Build-Binary {
         $goWinres = Get-Command go-winres -ErrorAction SilentlyContinue
         if (-not $goWinres) {
             Write-Info "go-winres not found; installing pinned v0.3.3"
-            $installOutput = go install github.com/tc-hib/go-winres@v0.3.3 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                Write-Warn "go install go-winres failed; binary will have no icon"
+            # Native commands (go) write progress like "go: downloading ..." to stderr.
+            # With $ErrorActionPreference='Stop' that stderr is promoted to a terminating
+            # RemoteException even on success. Locally relax the preference and rely on
+            # $LASTEXITCODE — the only reliable success signal for native binaries.
+            $prevEAP = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            try {
+                $installOutput = & go install github.com/tc-hib/go-winres@v0.3.3 2>&1
+                $installExit = $LASTEXITCODE
+            } finally {
+                $ErrorActionPreference = $prevEAP
+            }
+            if ($installExit -ne 0) {
+                Write-Warn "go install go-winres failed (exit $installExit); binary will have no icon"
                 foreach ($line in $installOutput) {
                     $text = "$line".Trim()
                     if ($text.Length -gt 0) { Write-Host "  $text" -ForegroundColor Yellow }
@@ -465,9 +476,17 @@ function Build-Binary {
                     if ($verMatch) { $cleanVersion = ($verMatch.Matches[0].Groups[1].Value) -replace '^v', '' }
                 }
                 if ([string]::IsNullOrWhiteSpace($cleanVersion)) { $cleanVersion = "0.0.0.0" }
-                $winresOutput = go-winres make --product-version $cleanVersion --file-version $cleanVersion 2>&1
-                if ($LASTEXITCODE -ne 0) {
-                    Write-Warn "go-winres make failed; continuing without embedded icon"
+
+                $prevEAP = $ErrorActionPreference
+                $ErrorActionPreference = 'Continue'
+                try {
+                    $winresOutput = & go-winres make --product-version $cleanVersion --file-version $cleanVersion 2>&1
+                    $winresExit = $LASTEXITCODE
+                } finally {
+                    $ErrorActionPreference = $prevEAP
+                }
+                if ($winresExit -ne 0) {
+                    Write-Warn "go-winres make failed (exit $winresExit); continuing without embedded icon"
                     foreach ($line in $winresOutput) {
                         $text = "$line".Trim()
                         if ($text.Length -gt 0) { Write-Host "  $text" -ForegroundColor Yellow }
