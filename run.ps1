@@ -970,6 +970,110 @@ function Register-OnPath {
     }
 }
 
+# -- Remove a directory entry from user PATH (DFD-8) -----------
+function Remove-FromUserPath {
+    param([string]$DirToRemove)
+
+    if ([string]::IsNullOrWhiteSpace($DirToRemove)) { return }
+    $normalized = $DirToRemove.TrimEnd('\')
+
+    $sessionParts = ($env:Path -split ';') | Where-Object { $_ -and ($_.TrimEnd('\') -ine $normalized) }
+    $env:Path = ($sessionParts -join ';')
+
+    try {
+        $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+        if (-not $userPath) { return }
+        $userParts = ($userPath -split ';') | Where-Object { $_ -and ($_.TrimEnd('\') -ine $normalized) }
+        $newUserPath = ($userParts -join ';')
+        if ($newUserPath -ne $userPath) {
+            [Environment]::SetEnvironmentVariable('Path', $newUserPath, 'User')
+            Write-Success "PATH: removed stale entry -> $normalized"
+        }
+    } catch {
+        Write-Warn "PATH: could not edit user PATH: $_"
+    }
+}
+
+# -- Migrate a stale active gitmap binary off-target (DFD-8) ---
+# When the binary on PATH lives outside the resolved deploy target, the
+# old behaviour was to copy the new build *into* the stale location,
+# preserving the wrong path forever. Instead: delete the stale binary,
+# remove its parent dir if it is now empty, and strip its directory
+# from the user PATH.
+function Migrate-StaleActiveBinary {
+    param(
+        [string]$StaleBinaryPath,
+        [string]$DeployedAppDir,
+        [string]$BinaryName
+    )
+
+    if (-not (Test-Path $StaleBinaryPath)) { return }
+
+    $staleDir = Split-Path $StaleBinaryPath -Parent
+    $staleResolved = (Resolve-Path $staleDir).Path.TrimEnd('\')
+    $deployResolved = (Resolve-Path $DeployedAppDir).Path.TrimEnd('\')
+    if ($staleResolved -ieq $deployResolved) { return }
+
+    Write-Warn "PATH: stale active binary detected -> $StaleBinaryPath"
+    Write-Info "PATH: migrating away from stale location"
+
+    foreach ($pat in @($BinaryName, "$BinaryName.old", "$($BinaryName.Replace('.exe',''))-update-*.exe")) {
+        $hits = Get-ChildItem -Path $staleDir -Filter $pat -File -ErrorAction SilentlyContinue
+        foreach ($f in $hits) {
+            try {
+                Remove-Item $f.FullName -Force -ErrorAction Stop
+                Write-Info "[cleanup] removed stale $($f.FullName)"
+            } catch {
+                Write-Warn "[cleanup] could not remove $($f.FullName): $_"
+            }
+        }
+    }
+
+    # Walk upward removing now-empty gitmap-owned dirs.
+    $cursor = $staleDir
+    for ($i = 0; $i -lt 3; $i++) {
+        if (-not (Test-Path $cursor)) { break }
+        $remaining = Get-ChildItem -Path $cursor -Force -ErrorAction SilentlyContinue
+        if ($remaining -and $remaining.Count -gt 0) { break }
+        try {
+            Remove-Item $cursor -Force -Recurse -ErrorAction Stop
+            Write-Info "[cleanup] removed empty stale dir $cursor"
+        } catch {
+            Write-Warn "[cleanup] could not remove $cursor : $_"
+            break
+        }
+        $cursor = Split-Path $cursor -Parent
+    }
+
+    Remove-FromUserPath -DirToRemove $staleResolved
+    $staleParent = Split-Path $staleResolved -Parent
+    if ($staleParent -and ($staleParent.TrimEnd('\') -ne ([System.IO.Path]::GetPathRoot($staleParent).TrimEnd('\')))) {
+        Remove-FromUserPath -DirToRemove $staleParent
+    }
+}
+
+# -- Persist resolved deploy target back to powershell.json (DFD-9)
+function Sync-ConfigDeployPath {
+    param([string]$EffectiveDeployTarget)
+
+    $configPath = Join-Path $GitMapDir "powershell.json"
+    if (-not (Test-Path $configPath)) { return }
+
+    try {
+        $raw = Get-Content $configPath -Raw
+        $cfg = $raw | ConvertFrom-Json
+        $existing = "$($cfg.deployPath)".TrimEnd('\')
+        $resolved = $EffectiveDeployTarget.TrimEnd('\')
+        if ($existing -ieq $resolved) { return }
+
+        $cfg.deployPath = $resolved
+        ($cfg | ConvertTo-Json -Depth 10) | Set-Content -Path $configPath -Encoding UTF8
+        Write-Success "Config: powershell.json deployPath updated -> $resolved"
+    } catch {
+        Write-Warn "Config: could not update powershell.json: $_"
+    }
+}
+
 
 # -- Run gitmap ------------------------------------------------
 function Invoke-Run {
