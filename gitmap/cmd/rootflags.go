@@ -41,12 +41,13 @@ func resolveScanDir(fs *flag.FlagSet) string {
 }
 
 // parseCloneFlags parses flags for the clone command.
-func parseCloneFlags(args []string) (source, folderName, targetDir, sshKeyName string, safePull, ghDesktop, verbose bool) {
+func parseCloneFlags(args []string) (source, folderName, targetDir, sshKeyName string, safePull, ghDesktop, noReplace, verbose bool) {
 	fs := flag.NewFlagSet(constants.CmdClone, flag.ExitOnError)
 	targetFlag := fs.String("target-dir", constants.DefaultDir, constants.FlagDescTargetDir)
 	safePullFlag := fs.Bool("safe-pull", false, constants.FlagDescSafePull)
 	ghDesktopFlag := fs.Bool("github-desktop", false, constants.FlagDescGHDesktop)
 	verboseFlag := fs.Bool("verbose", false, constants.FlagDescVerbose)
+	noReplaceFlag := fs.Bool("no-replace", false, constants.FlagDescCloneNoReplace)
 	sshKeyFlag := fs.String("ssh-key", "", "SSH key name for clone")
 	fs.StringVar(sshKeyFlag, "K", "", "SSH key name (short)")
 	fs.Parse(args)
@@ -54,7 +55,7 @@ func parseCloneFlags(args []string) (source, folderName, targetDir, sshKeyName s
 	source = resolveCloneSource(fs)
 	folderName = resolveCloneFolderName(fs)
 
-	return source, folderName, *targetFlag, *sshKeyFlag, *safePullFlag, *ghDesktopFlag, *verboseFlag
+	return source, folderName, *targetFlag, *sshKeyFlag, *safePullFlag, *ghDesktopFlag, *noReplaceFlag, *verboseFlag
 }
 
 // resolveCloneSource returns the clone source from positional args.
