@@ -42,7 +42,7 @@ func applySSHKey(name string) {
 // runClone handles the "clone" subcommand.
 func runClone(args []string) {
 	checkHelp("clone", args)
-	source, folderName, targetDir, sshKeyName, safePull, ghDesktop, verboseMode := parseCloneFlags(args)
+	source, folderName, targetDir, sshKeyName, safePull, ghDesktop, noReplace, verboseMode := parseCloneFlags(args)
 	if len(source) == 0 {
 		fmt.Fprintln(os.Stderr, constants.ErrSourceRequired)
 		fmt.Fprintln(os.Stderr, constants.ErrCloneUsage)
@@ -53,7 +53,7 @@ func runClone(args []string) {
 	applySSHKey(sshKeyName)
 
 	if isDirectURL(source) {
-		executeDirectClone(source, folderName, ghDesktop)
+		executeDirectClone(source, folderName, ghDesktop, noReplace)
 
 		return
 	}
