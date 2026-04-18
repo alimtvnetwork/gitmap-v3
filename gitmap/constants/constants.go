@@ -13,7 +13,7 @@
 package constants
 
 // Version.
-const Version = "2.84.0"
+const Version = "2.85.0"
 
 // RepoPath is set at build time via -ldflags.
 var RepoPath = ""

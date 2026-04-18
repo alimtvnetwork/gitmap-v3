@@ -66,6 +66,29 @@ const (
 const (
 	UpdatePSHeader = `# gitmap self-update script (auto-generated)
 Set-Location "%s"
+
+# Refresh run.ps1 from origin BEFORE invoking it, so a stale/buggy local
+# copy can't break the update flow (e.g. positional-binding errors from
+# old code paths). Best-effort: silently skip if git is unavailable or
+# the repo has uncommitted run.ps1 changes.
+try {
+    $gitCmd = Get-Command git -ErrorAction SilentlyContinue
+    if ($gitCmd) {
+        $statusOut = & git status --porcelain -- run.ps1 2>$null
+        if ([string]::IsNullOrWhiteSpace($statusOut)) {
+            & git fetch --quiet origin 2>$null | Out-Null
+            $headBranch = (& git symbolic-ref --quiet --short HEAD 2>$null)
+            if ($headBranch) {
+                & git checkout --quiet "origin/$headBranch" -- run.ps1 2>$null | Out-Null
+                Write-Host "  [INFO] Refreshed run.ps1 from origin/$headBranch" -ForegroundColor DarkGray
+            }
+        } else {
+            Write-Host "  [INFO] Local run.ps1 has uncommitted changes; skipping refresh" -ForegroundColor DarkGray
+        }
+    }
+} catch {
+    Write-Host "  [WARN] Could not refresh run.ps1: $_" -ForegroundColor Yellow
+}
 `
 	UpdatePSDeployDetect = `
 $configPath = Join-Path "%s" "gitmap\powershell.json"
