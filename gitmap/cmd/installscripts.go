@@ -103,12 +103,26 @@ func resolveScriptsDir() string {
 }
 
 // resolveScriptsDirWindows reads powershell.json for the deploy drive.
+// Search order:
+//  1. <binaryDir>/powershell.json — written by install-quick.ps1
+//  2. ./gitmap/powershell.json    — repo checkout
+//  3. ./powershell.json           — repo root
+//  4. Default: D:\gitmap-scripts
 func resolveScriptsDirWindows() string {
-	// Try to read powershell.json from repo or current dir.
-	candidates := []string{
+	candidates := []string{}
+
+	if exe, err := os.Executable(); err == nil {
+		if resolved, evalErr := filepath.EvalSymlinks(exe); evalErr == nil {
+			candidates = append(candidates, filepath.Join(filepath.Dir(resolved), "powershell.json"))
+		} else {
+			candidates = append(candidates, filepath.Join(filepath.Dir(exe), "powershell.json"))
+		}
+	}
+
+	candidates = append(candidates,
 		filepath.Join("gitmap", "powershell.json"),
 		"powershell.json",
-	}
+	)
 
 	for _, path := range candidates {
 		data, err := os.ReadFile(path)

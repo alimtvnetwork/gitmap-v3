@@ -61,6 +61,26 @@ fi
 
 printf '\n  \033[32mInstalling gitmap to: %s\033[0m\n\n' "${INSTALL_DIR}"
 
+# Persist the chosen install path so `gitmap install scripts` and
+# `run.sh` pick the same folder automatically.
+save_deploy_path() {
+    local dir="$1"
+    mkdir -p "${dir}" 2>/dev/null || true
+    local cfg="${dir}/powershell.json"
+    cat > "${cfg}" <<EOF
+{
+  "deployPath": "${dir}",
+  "buildOutput": "./bin",
+  "binaryName": "gitmap",
+  "goSource": "./gitmap",
+  "copyData": true
+}
+EOF
+    printf '  \033[90mSaved deployPath -> %s\033[0m\n' "${cfg}"
+}
+
+save_deploy_path "${INSTALL_DIR}" || printf '  \033[33m[WARN] Could not save powershell.json\033[0m\n'
+
 ARGS=(--dir "${INSTALL_DIR}")
 if [ -n "${VERSION}" ]; then
     ARGS+=(--version "${VERSION}")
