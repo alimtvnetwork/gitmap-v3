@@ -31,13 +31,37 @@ function Get-ReleaseFromBinary {
     }
 
     if ($Binary.Length -gt 0 -and (Test-Path $Binary)) {
+        # Strategy A: parse `list-versions` output, take the HIGHEST semver
+        # (the command lists ascending, so --limit 1 gave the oldest — bug
+        # surfaced as "Last release: v2.82.0" while the binary was 2.93.0).
         try {
-            $output = & $Binary list-versions --limit 1 2>&1
+            $output = & $Binary list-versions 2>&1
             if ($LASTEXITCODE -eq 0 -and $output) {
-                $line = ($output | Out-String).Trim()
-                if ($line -match '(v\d+\.\d+\.\d+)') {
-                    return $Matches[1]
+                $allVersions = @()
+                foreach ($l in ($output | Out-String).Trim() -split "`n") {
+                    if ($l -match '(v\d+\.\d+\.\d+)') {
+                        $allVersions += $Matches[1]
+                    }
                 }
+                if ($allVersions.Count -gt 0) {
+                    $sorted = $allVersions | Sort-Object {
+                        $parts = $_.TrimStart('v') -split '\.'
+                        [int]$parts[0] * 1000000 + [int]$parts[1] * 1000 + [int]$parts[2]
+                    } -Descending
+                    return $sorted[0]
+                }
+            }
+        } catch {
+        }
+
+        # Strategy B: ask the binary its own version directly
+        try {
+            $vOut = & $Binary version 2>&1
+            $vText = ($vOut | Out-String).Trim()
+            if ($vText -match '(v?\d+\.\d+\.\d+)') {
+                $v = $Matches[1]
+                if (-not $v.StartsWith('v')) { $v = "v$v" }
+                return $v
             }
         } catch {
         }
