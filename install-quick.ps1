@@ -38,6 +38,28 @@ function Read-InstallDir([string]$default) {
     return $answer.Trim('"').Trim()
 }
 
+function Save-DeployPath([string]$dir) {
+    # Persist the chosen install path so `gitmap install scripts` and
+    # `run.ps1` pick the same drive/folder automatically.
+    try {
+        if (-not (Test-Path $dir)) {
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        }
+        $cfgPath = Join-Path $dir "powershell.json"
+        $cfg = [ordered]@{
+            deployPath  = $dir
+            buildOutput = "./bin"
+            binaryName  = "gitmap.exe"
+            goSource    = "./gitmap"
+            copyData    = $true
+        }
+        ($cfg | ConvertTo-Json) | Set-Content -Path $cfgPath -Encoding UTF8
+        Write-Host "  Saved deployPath -> $cfgPath" -ForegroundColor DarkGray
+    } catch {
+        Write-Host "  [WARN] Could not save powershell.json: $_" -ForegroundColor Yellow
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($InstallDir)) {
     $InstallDir = Read-InstallDir $DefaultDir
 }
@@ -45,6 +67,8 @@ if ([string]::IsNullOrWhiteSpace($InstallDir)) {
 Write-Host ""
 Write-Host "  Installing gitmap to: $InstallDir" -ForegroundColor Green
 Write-Host ""
+
+Save-DeployPath $InstallDir
 
 $script = (Invoke-WebRequest -Uri $InstallerUrl -UseBasicParsing).Content
 $block  = [ScriptBlock]::Create($script)
