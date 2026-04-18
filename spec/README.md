@@ -106,6 +106,8 @@ Feature specs, command designs, and refactor documentation for the gitmap CLI.
 | 94 | [install-script.md](01-app/94-install-script.md) | One-liner install scripts |
 | 95 | [pending-task-workflow.md](01-app/95-pending-task-workflow.md) | Pending task workflow |
 | 96 | [axios-version-control.md](01-app/96-axios-version-control.md) | Axios version control |
+| 96 | [clone-replace-existing-folder.md](01-app/96-clone-replace-existing-folder.md) | Clone replace-existing-folder strategy |
+| 97 | [move-and-merge.md](01-app/97-move-and-merge.md) | `mv` / `merge-both` / `merge-left` / `merge-right` between folders and URLs |
 
 ---
 

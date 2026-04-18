@@ -209,18 +209,88 @@ gitmap rescan                   # re-scan all known directories
 
 | Command | Alias | Description |
 |---------|-------|-------------|
-| `clone` | `c` | Re-clone repos from structured file |
+| `clone` | `c` | Clone from a structured file OR a direct URL |
 | `clone-next` | `cn` | Clone next versioned iteration of current repo |
 | `desktop-sync` | `ds` | Sync tracked repos with GitHub Desktop |
 
 ```bash
+# clone from a structured file
 gitmap clone json --target-dir ./restored
-gitmap cn v++                   # my-app-v3 → my-app-v4
-gitmap cn v15 --delete          # jump to v15, delete current
-gitmap cn v++ --create-remote   # create GitHub repo if missing
+gitmap clone csv                                # auto-resolves to ./gitmap-output/gitmap.csv
+gitmap clone ./gitmap-output/gitmap.json --safe-pull
+gitmap clone ./gitmap-output/gitmap.json --github-desktop
+
+# clone a single repo by URL (auto-flattens versioned URLs)
+gitmap clone https://github.com/alimtvnetwork/gitmap-v3
+gitmap clone https://github.com/alimtvnetwork/gitmap-v3 my-folder
+gitmap clone git@github.com:alimtvnetwork/gitmap-v3.git my-folder
+gitmap clone https://github.com/alimtvnetwork/gitmap-v3 --replace   # see spec 96
+
+# clone-next: jump to the next (or specific) versioned sibling
+gitmap cn v++                                   # my-app-v3 -> my-app-v4
+gitmap cn v15 --delete                          # jump to v15, delete current
+gitmap cn v++ --create-remote                   # create GitHub repo if missing
+gitmap cn v++ --no-flatten                      # keep nested folder layout
 ```
 
 → [clone](gitmap/helptext/clone.md) · [clone-next](gitmap/helptext/clone-next.md) · [desktop-sync](gitmap/helptext/desktop-sync.md)
+
+---
+
+<div align="center">
+
+### Move & Merge
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `mv` | `move` | Move LEFT into RIGHT, then delete LEFT |
+| `merge-both` | — | Fill missing files on BOTH sides; prompt on conflicts |
+| `merge-left` | — | Copy from RIGHT into LEFT; prompt on conflicts |
+| `merge-right` | — | Copy from LEFT into RIGHT; prompt on conflicts |
+
+Each side (LEFT / RIGHT) can be a local folder OR a remote URL.
+URL endpoints are auto-cloned (or pulled if already cloned), and
+the result is committed + pushed back when the operation completes.
+
+```bash
+# move: classic file copy + delete source
+gitmap mv ./gitmap-v3 ./gitmap-v4
+gitmap mv ./gitmap-v3 https://github.com/alimtvnetwork/gitmap-v4
+gitmap mv https://github.com/alimtvnetwork/gitmap-v3 ./another-folder
+gitmap mv https://github.com/alimtvnetwork/gitmap-v3 \
+         https://github.com/alimtvnetwork/gitmap-v4
+
+# merge-both: bidirectional fill (each side gains what the other has)
+gitmap merge-both ./gitmap-v3 ./gitmap-v4
+gitmap merge-both ./gitmap-v3 https://github.com/alimtvnetwork/gitmap-v4
+gitmap merge-both https://github.com/alimtvnetwork/gitmap-v3 \
+                  https://github.com/alimtvnetwork/gitmap-v4
+
+# merge-left: take RIGHT into LEFT
+gitmap merge-left ./gitmap-v3 ./gitmap-v4
+gitmap merge-left ./local https://github.com/alimtvnetwork/gitmap-v4
+
+# merge-right: take LEFT into RIGHT
+gitmap merge-right ./gitmap-v3 ./gitmap-v4
+gitmap merge-right ./local https://github.com/alimtvnetwork/gitmap-v4
+
+# bypass conflict prompts: source-side wins by default
+gitmap merge-right ./gitmap-v3 ./gitmap-v4 -y
+gitmap merge-both  ./gitmap-v3 ./gitmap-v4 -y --prefer-newer
+
+# pin remote branch + preview
+gitmap merge-right ./local https://github.com/owner/repo:develop
+gitmap mv ./gitmap-v3 ./gitmap-v4 --dry-run
+```
+
+Conflict prompt keys: **L**eft / **R**ight / **S**kip /
+**A**ll-left / **B**all-right / **Q**uit. Pass `-y` (or `-a`) to
+bypass; combine with `--prefer-left` / `--prefer-right` /
+`--prefer-newer` / `--prefer-skip` to override the default policy.
+
+→ [spec/01-app/97-move-and-merge.md](spec/01-app/97-move-and-merge.md)
 
 ---
 
