@@ -250,14 +250,28 @@ resolve_effective_repo() {
 
 An implementation conforms when:
 
-- [ ] Parses `-v<N>` suffix from the URL's last path segment.
-- [ ] Probes `N+1 .. ceiling` with HEAD requests, fail-fast on first MISS.
-- [ ] Logs every probe with `[discovery]` prefix.
-- [ ] Delegates to the highest existing `-v<M>` installer, passing through flags.
-- [ ] Sets `INSTALLER_DELEGATED=1` to prevent recursion.
-- [ ] Honours `--no-discovery`, `--probe-ceiling`, `--no-fail-fast`.
-- [ ] Falls back gracefully on network errors (use baseline, never crash).
-- [ ] No more than `probeCeiling - N + 1` HTTP requests in worst case.
+- [x] Parses `-v<N>` suffix from the URL's last path segment.
+- [x] Probes `N+1 .. ceiling` with HEAD requests, fail-fast on first MISS.
+- [x] Logs every probe with `[discovery]` prefix.
+- [x] Delegates to the highest existing `-v<M>` installer, passing through flags.
+- [x] Sets `INSTALLER_DELEGATED=1` to prevent recursion.
+- [x] Honours `--no-discovery`, `--probe-ceiling`. (`--no-fail-fast` not yet implemented — fail-fast is the only mode.)
+- [x] Falls back gracefully on network errors (use baseline, never crash).
+- [x] No more than `probeCeiling - N + 1` HTTP requests in worst case.
+
+**Implementation status (v2.88.0):**
+
+| Script                          | Discovery | Loop guard | Knobs                            |
+|---------------------------------|-----------|------------|----------------------------------|
+| `install-quick.ps1`             | ✅        | ✅         | `-NoDiscovery`, `-ProbeCeiling`  |
+| `install-quick.sh`              | ✅        | ✅         | `--no-discovery`, `--probe-ceiling` |
+| `gitmap/scripts/install.ps1`    | ✅        | ✅         | `-NoDiscovery`, `-ProbeCeiling`  |
+| `gitmap/scripts/install.sh`     | ✅        | ✅         | `--no-discovery`, `--probe-ceiling` |
+
+**Outstanding:**
+
+- [ ] `--no-fail-fast` opt-in mode (probe full range, max-hit wins) — deferred until a non-contiguous version line appears.
+
 
 ---
 
