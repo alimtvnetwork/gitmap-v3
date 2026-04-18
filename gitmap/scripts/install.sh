@@ -37,6 +37,7 @@ set -euo pipefail
 REPO="alimtvnetwork/gitmap-v3"
 BINARY_NAME="gitmap"
 TMP_DIR=""
+APP_DIR=""
 PATH_SHELL=""
 PATH_TARGET=""
 PATH_LINE=""
@@ -279,18 +280,102 @@ download_asset() {
     echo "${archive_path}"
 }
 
+# ── Layout repair + pre-deploy cleanup (DFD-3, DFD-6) ──────────────
+# Migrates legacy unwrapped install (<dir>/gitmap) into nested
+# <dir>/gitmap/gitmap layout and removes prior-deploy artifacts.
+
+repair_layout() {
+    local target="$1"
+    local app_dir="$target/${BINARY_NAME}"
+    local legacy_binary="$target/${BINARY_NAME}"
+    local wrapped_binary="$app_dir/${BINARY_NAME}"
+
+    # Special case: when target ends with /<binary> the legacy and wrapped
+    # paths collide. Skip — caller resolved into a parent dir.
+    if [ -f "$legacy_binary" ] && [ ! -d "$app_dir" ]; then
+        step "Layout: migrating legacy unwrapped install -> ${app_dir}"
+        mkdir -p "$app_dir"
+        local name src dst
+        for name in "${BINARY_NAME}" data CHANGELOG.md docs docs-site; do
+            src="$target/$name"
+            dst="$app_dir/$name"
+            [ ! -e "$src" ] && continue
+            [ -e "$dst" ] && continue
+            mv "$src" "$dst" 2>/dev/null && \
+                step "  moved $name -> ${BINARY_NAME}/$name"
+        done
+    elif [ -f "$legacy_binary" ] && [ -f "$wrapped_binary" ]; then
+        rm -f "$legacy_binary" 2>/dev/null && \
+            step "Layout: removed leftover legacy binary $legacy_binary"
+    else
+        step "Layout: OK"
+    fi
+}
+
+cleanup_prior_artifacts() {
+    local target="$1" app_dir="$2"
+    local stem="${BINARY_NAME}"
+    local removed=0
+    local dir pat f
+
+    for dir in "$target" "$app_dir"; do
+        [ ! -d "$dir" ] && continue
+        for pat in "*.old" "${stem}-update-*" "updater-tmp-*"; do
+            for f in "$dir"/$pat; do
+                [ ! -e "$f" ] && continue
+                rm -rf "$f" 2>/dev/null && {
+                    step "[cleanup] removed $f"
+                    removed=$((removed + 1))
+                }
+            done
+        done
+    done
+
+    local tmp_root="${TMPDIR:-/tmp}"
+    if [ -d "$tmp_root" ]; then
+        for f in "$tmp_root/${stem}-update-"*; do
+            [ ! -e "$f" ] && continue
+            rm -rf "$f" 2>/dev/null && {
+                step "[cleanup] removed temp $f"
+                removed=$((removed + 1))
+            }
+        done
+    fi
+
+    if [ -d "$target" ]; then
+        for f in "$target"/*.gitmap-tmp-*; do
+            [ ! -d "$f" ] && continue
+            rm -rf "$f" 2>/dev/null && {
+                step "[cleanup] removed swap dir $f"
+                removed=$((removed + 1))
+            }
+        done
+    fi
+
+    if [ "$removed" -gt 0 ]; then
+        ok "[cleanup] removed $removed artifact(s)"
+    else
+        step "[cleanup] nothing to clean"
+    fi
+}
+
 # ── Extract and install binary ─────────────────────────────────────
 
 install_binary() {
     local archive_path="$1" install_dir="$2" os="$3" arch="$4" version="$5"
 
-    step "Installing to ${install_dir}..."
-    mkdir -p "${install_dir}"
+    # DFD-1/DFD-3: nested layout. install_dir is the deploy ROOT (e.g.
+    # ~/.local/bin); the actual app folder is ${install_dir}/${BINARY_NAME}.
+    repair_layout "${install_dir}"
+    local app_dir="${install_dir}/${BINARY_NAME}"
+    cleanup_prior_artifacts "${install_dir}" "${app_dir}"
+
+    step "Installing to ${app_dir}..."
+    mkdir -p "${app_dir}"
 
     local extract_dir="${TMP_DIR}/extract"
     mkdir -p "${extract_dir}"
 
-    # Extract based on file type
     case "${archive_path}" in
         *.tar.gz|*.tgz)
             tar -xzf "${archive_path}" -C "${extract_dir}"
@@ -309,52 +394,35 @@ install_binary() {
             ;;
     esac
 
-    # Search for the binary — exact name or versioned pattern
     local binary_path=""
     local candidate
 
-    # Priority 1: exact binary name
     candidate="$(find "${extract_dir}" -type f -name "${BINARY_NAME}" | head -1)"
-    if [ -n "${candidate}" ]; then
-        binary_path="${candidate}"
-    fi
+    [ -n "${candidate}" ] && binary_path="${candidate}"
 
-    # Priority 2: platform-specific name (e.g. gitmap-linux-amd64)
     if [ -z "${binary_path}" ]; then
         candidate="$(find "${extract_dir}" -type f -name "${BINARY_NAME}-${os}-${arch}" | head -1)"
-        if [ -n "${candidate}" ]; then
-            binary_path="${candidate}"
-        fi
+        [ -n "${candidate}" ] && binary_path="${candidate}"
     fi
 
-    # Priority 3: versioned pattern (e.g. gitmap-v3.55.0-linux-amd64)
     if [ -z "${binary_path}" ]; then
         candidate="$(find "${extract_dir}" -type f -regex ".*/${BINARY_NAME}-v[0-9][0-9.]*-${os}-${arch}" | head -1)"
-        if [ -n "${candidate}" ]; then
-            binary_path="${candidate}"
-        fi
+        [ -n "${candidate}" ] && binary_path="${candidate}"
     fi
 
-    # Priority 4: any executable file in the archive
     if [ -z "${binary_path}" ]; then
         candidate="$(find "${extract_dir}" -type f -executable | head -1)"
-        if [ -n "${candidate}" ]; then
-            binary_path="${candidate}"
-        fi
+        [ -n "${candidate}" ] && binary_path="${candidate}"
     fi
 
     if [ -z "${binary_path}" ]; then
         err "Archive did not contain a recognizable binary."
-        err "Archive contents:"
-        find "${extract_dir}" -type f | while read -r f; do
-            err "  ${f}"
-        done
+        find "${extract_dir}" -type f | while read -r f; do err "  ${f}"; done
         exit 1
     fi
 
-    local target_path="${install_dir}/${BINARY_NAME}"
+    local target_path="${app_dir}/${BINARY_NAME}"
 
-    # Rename-first strategy for running binary
     if [ -f "${target_path}" ]; then
         mv -f "${target_path}" "${target_path}.old" 2>/dev/null || true
     fi
@@ -362,15 +430,17 @@ install_binary() {
     mv -f "${binary_path}" "${target_path}"
     chmod +x "${target_path}"
 
-    # Cleanup .old
     rm -f "${target_path}.old" 2>/dev/null || true
 
     if [ ! -f "${target_path}" ]; then
-        err "Install failed: ${BINARY_NAME} was not written to ${install_dir}"
+        err "Install failed: ${BINARY_NAME} was not written to ${app_dir}"
         exit 1
     fi
 
-    ok "Installed ${BINARY_NAME} to ${install_dir}"
+    ok "Installed ${BINARY_NAME} to ${app_dir}"
+
+    # Echo the app dir so main() can use it for PATH + summary.
+    APP_DIR="${app_dir}"
 }
 
 # ── Download and extract docs-site.zip release asset ───────────────
@@ -413,22 +483,43 @@ install_docs_site() {
 
 # add_path_to_profile writes an export line to a single profile file (idempotent).
 # Returns 0 if written, 1 if already present.
+# add_path_to_profile writes a marker-block snippet (per
+# spec/04-generic-cli/21-post-install-shell-activation) to a single
+# profile file. Idempotent: rewrites the existing block if present.
+# Returns 0 if written, 1 if no-op.
 add_path_to_profile() {
     local dir="$1" profile_file="$2" is_fish="$3"
 
-    local path_line
+    local marker_open="# gitmap shell wrapper v2 - managed by gitmap installer. Do not edit manually."
+    local marker_close="# gitmap shell wrapper v2 end"
+    local snippet
     if [ "${is_fish}" = true ]; then
-        path_line="fish_add_path ${dir}"
+        snippet="${marker_open}
+set -gx GITMAP_WRAPPER 1
+fish_add_path ${dir}
+${marker_close}"
     else
-        path_line="export PATH=\"\$PATH:${dir}\""
-    fi
-
-    if [ -f "${profile_file}" ] && grep -qF "${dir}" "${profile_file}"; then
-        return 1
+        snippet="${marker_open}
+export GITMAP_WRAPPER=1
+case \":\${PATH}:\" in *\":${dir}:\"*) ;; *) export PATH=\"\$PATH:${dir}\" ;; esac
+${marker_close}"
     fi
 
     mkdir -p "$(dirname "${profile_file}")"
-    printf '\n# Added by gitmap installer\n%s\n' "${path_line}" >> "${profile_file}"
+    touch "${profile_file}"
+
+    if grep -qF "${marker_open}" "${profile_file}" 2>/dev/null; then
+        local tmp
+        tmp="$(mktemp)"
+        awk -v open="${marker_open}" -v close="${marker_close}" -v body="${snippet}" '
+            $0 == open { skip = 1; print body; next }
+            skip && $0 == close { skip = 0; next }
+            !skip { print }
+        ' "${profile_file}" > "${tmp}" && mv "${tmp}" "${profile_file}"
+        return 1
+    fi
+
+    printf '\n%s\n' "${snippet}" >> "${profile_file}"
     return 0
 }
 
@@ -670,17 +761,18 @@ main() {
     TMP_DIR="$(mktemp -d)"
     archive_path="$(download_asset "${version}" "${os}" "${arch}")"
 
+    APP_DIR=""
     install_binary "${archive_path}" "${install_dir}" "${os}" "${arch}" "${version}"
 
     # Bundle the docs site so `gitmap help-dashboard` works after install.
-    install_docs_site "${version}" "${install_dir}"
+    install_docs_site "${version}" "${APP_DIR}"
 
     if [ "${NO_PATH}" = false ]; then
-        add_to_path "${install_dir}"
+        add_to_path "${APP_DIR}"
     fi
 
     # Verify the binary works
-    local bin_path="${install_dir}/${BINARY_NAME}"
+    local bin_path="${APP_DIR}/${BINARY_NAME}"
     local installed_version="${version}"
     if [ -f "${bin_path}" ]; then
         echo ""
@@ -698,14 +790,14 @@ main() {
     print_install_summary "${installed_version}" "${bin_path}"
     if [ "${NO_PATH}" = false ]; then
         echo ""
-        printf '  \033[32m✓\033[0m  To start using gitmap \033[1mright now\033[0m, run:\n' >&2
+        printf '  \033[32mOK\033[0m  To start using gitmap \033[1mright now\033[0m, run:\n' >&2
         echo "" >&2
         printf '      \033[36m%s\033[0m\n' "${PATH_RELOAD}" >&2
         echo "" >&2
         printf '     Or open a new terminal window.\n' >&2
         echo "" >&2
-        printf '  \033[90mInstalled to: %s\033[0m\n' "${install_dir}/${BINARY_NAME}" >&2
-        printf '  \033[90mPATH added to: %s %s %s %s\033[0m\n' "~/.zshrc" "~/.zprofile" "~/.bashrc" "~/.profile" >&2
+        printf '  \033[90mInstalled to: %s\033[0m\n' "${bin_path}" >&2
+        printf '  \033[90mApp folder on PATH: %s\033[0m\n' "${APP_DIR}" >&2
     fi
 
     echo ""

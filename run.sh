@@ -475,6 +475,191 @@ resolve_deploy_target() {
     echo "$DEPLOY_TARGET"
 }
 
+# -- Repair legacy unwrapped layout (DFD-3) --------------------
+# If <target>/<binary> exists at the top level (not nested under
+# <target>/gitmap/), move it + sibling data/ into the gitmap/
+# subfolder. Idempotent — re-running on a correct layout is a no-op.
+repair_deploy_layout() {
+    local target="$1"
+    local app_dir="$target/gitmap"
+    local legacy_binary="$target/$BINARY_NAME"
+    local wrapped_binary="$app_dir/$BINARY_NAME"
+
+    if [[ ! -f "$legacy_binary" ]]; then
+        write_info "Layout: OK (no legacy binary at $target)"
+        return
+    fi
+
+    if [[ -f "$wrapped_binary" ]]; then
+        if rm -f "$legacy_binary" 2>/dev/null; then
+            write_info "Layout: removed leftover legacy binary at $legacy_binary"
+        else
+            write_warn "Layout: could not remove legacy binary $legacy_binary"
+        fi
+        return
+    fi
+
+    write_info "Layout: migrating legacy unwrapped install -> $app_dir"
+    mkdir -p "$app_dir"
+
+    local name src dst
+    for name in "$BINARY_NAME" data CHANGELOG.md docs docs-site; do
+        src="$target/$name"
+        dst="$app_dir/$name"
+        [[ ! -e "$src" ]] && continue
+        if [[ -e "$dst" ]]; then
+            write_info "Layout: $name already inside gitmap/, skipping move"
+            continue
+        fi
+        if mv "$src" "$dst" 2>/dev/null; then
+            write_info "Layout: moved $name -> gitmap/$name"
+        else
+            write_warn "Layout: could not move $name"
+        fi
+    done
+}
+
+# -- Pre-deploy cleanup (DFD-6) --------------------------------
+# Removes prior-deploy artifacts before the new binary is copied:
+#   *.old, <binary>-update-*, updater-tmp-*, /tmp/<binary>-update-*,
+#   *.gitmap-tmp-* swap directories. Logs every removal; never aborts.
+invoke_deploy_cleanup() {
+    local target="$1"
+    local app_dir="$2"
+    local stem="${BINARY_NAME%.exe}"
+    local removed=0
+    local dir pat f
+
+    local scan_dirs=()
+    [[ -d "$target" ]]  && scan_dirs+=("$target")
+    [[ -d "$app_dir" ]] && [[ "$app_dir" != "$target" ]] && scan_dirs+=("$app_dir")
+
+    local patterns=("*.old" "${stem}-update-*" "updater-tmp-*")
+    for dir in "${scan_dirs[@]}"; do
+        for pat in "${patterns[@]}"; do
+            for f in "$dir"/$pat; do
+                [[ ! -e "$f" ]] && continue
+                if rm -rf "$f" 2>/dev/null; then
+                    write_info "[cleanup] removed $f"
+                    removed=$((removed + 1))
+                else
+                    write_warn "[cleanup] could not remove $f"
+                fi
+            done
+        done
+    done
+
+    # Temp-dir scripts: $TMPDIR or /tmp
+    local tmp_root="${TMPDIR:-/tmp}"
+    if [[ -d "$tmp_root" ]]; then
+        for f in "$tmp_root/${stem}-update-"*.sh "$tmp_root/${stem}-update-"*; do
+            [[ ! -e "$f" ]] && continue
+            if rm -rf "$f" 2>/dev/null; then
+                write_info "[cleanup] removed temp script $f"
+                removed=$((removed + 1))
+            fi
+        done
+    fi
+
+    # *.gitmap-tmp-* swap dirs left by interrupted clones
+    if [[ -d "$target" ]]; then
+        for f in "$target"/*.gitmap-tmp-*; do
+            [[ ! -d "$f" ]] && continue
+            if rm -rf "$f" 2>/dev/null; then
+                write_info "[cleanup] removed swap dir $f"
+                removed=$((removed + 1))
+            else
+                write_warn "[cleanup] could not remove $f"
+            fi
+        done
+    fi
+
+    if [[ $removed -gt 0 ]]; then
+        write_success "[cleanup] removed $removed artifact(s)"
+    else
+        write_info "[cleanup] nothing to clean"
+    fi
+}
+
+# -- Register on user PATH + refresh current session (DFD-4/5) -
+# Writes export line into shell rc files using the
+# 21-post-install-shell-activation marker block. Updates $PATH in the
+# current process and prints the reload one-liner.
+register_on_path() {
+    local app_dir="$1"
+    if [[ ! -d "$app_dir" ]]; then
+        write_warn "PATH: skipping (app dir does not exist: $app_dir)"
+        return
+    fi
+
+    local resolved
+    resolved=$(cd "$app_dir" && pwd)
+
+    case ":${PATH}:" in
+        *":${resolved}:"*)
+            write_info "PATH: already in current session"
+            ;;
+        *)
+            export PATH="$PATH:$resolved"
+            write_info "PATH: appended to current session -> $resolved"
+            ;;
+    esac
+
+    local shell_name
+    shell_name=$(basename "${SHELL:-/bin/bash}")
+
+    local profiles=()
+    case "$shell_name" in
+        zsh)  profiles=("$HOME/.zshrc" "$HOME/.zprofile") ;;
+        bash) profiles=("$HOME/.bashrc" "$HOME/.bash_profile") ;;
+        fish) profiles=("$HOME/.config/fish/config.fish") ;;
+        *)    profiles=("$HOME/.profile") ;;
+    esac
+
+    local marker_open="# gitmap shell wrapper v2 - managed by run.sh. Do not edit manually."
+    local marker_close="# gitmap shell wrapper v2 end"
+    local snippet
+    if [[ "$shell_name" == "fish" ]]; then
+        snippet="${marker_open}
+set -gx GITMAP_WRAPPER 1
+fish_add_path ${resolved}
+${marker_close}"
+    else
+        snippet="${marker_open}
+export GITMAP_WRAPPER=1
+case \":\${PATH}:\" in *\":${resolved}:\"*) ;; *) export PATH=\"\$PATH:${resolved}\" ;; esac
+${marker_close}"
+    fi
+
+    local profile written=0
+    for profile in "${profiles[@]}"; do
+        [[ -z "$profile" ]] && continue
+        mkdir -p "$(dirname "$profile")"
+        touch "$profile"
+        if grep -qF "$marker_open" "$profile" 2>/dev/null; then
+            # Rewrite existing block (sed-based, portable enough for bash/zsh/fish profiles)
+            local tmp
+            tmp=$(mktemp)
+            awk -v open="$marker_open" -v close="$marker_close" -v body="$snippet" '
+                $0 == open { skip = 1; print body; next }
+                skip && $0 == close { skip = 0; next }
+                !skip { print }
+            ' "$profile" > "$tmp" && mv "$tmp" "$profile"
+            write_info "PATH: refreshed marker block in $profile"
+        else
+            printf '\n%s\n' "$snippet" >> "$profile"
+            write_info "PATH: appended marker block to $profile"
+        fi
+        written=$((written + 1))
+    done
+
+    local primary="${profiles[0]}"
+    local reload_cmd="source $primary"
+    [[ "$shell_name" != "fish" ]] && reload_cmd=". $primary"
+    write_success "PATH: persisted to $written profile(s)"
+    write_info "PATH: to activate now in this shell, run: $reload_cmd"
+}
+
 # -- Deploy to target directory --------------------------------
 deploy_binary() {
     write_step "4/4" "Deploying"
@@ -485,8 +670,14 @@ deploy_binary() {
     write_info "Target: $target"
     mkdir -p "$target"
 
+    # Migrate legacy unwrapped layout (DFD-3) BEFORE we resolve $app_dir.
+    repair_deploy_layout "$target"
+
     local app_dir="$target/gitmap"
     mkdir -p "$app_dir"
+
+    # Pre-deploy cleanup (DFD-6) — runs BEFORE the new binary is copied.
+    invoke_deploy_cleanup "$target" "$app_dir"
 
     local dest_file="$app_dir/$BINARY_NAME"
     local backup_file="${dest_file}.old"
@@ -551,7 +742,9 @@ deploy_binary() {
     copy_docs_site "$app_dir"
 
     write_success "Deployed to $app_dir"
-    write_info "Ensure $app_dir is on your PATH to run: gitmap"
+
+    # Register on user PATH and refresh current session (DFD-4, DFD-5).
+    register_on_path "$app_dir"
 
     DEPLOYED_BINARY_PATH="$dest_file"
 }
