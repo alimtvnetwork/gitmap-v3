@@ -293,6 +293,21 @@ const (
 	ErrCloneURLExists     = "Error: target folder already exists: %s\n"
 )
 
+// Clone replace-existing-folder flow (spec/01-app/96-clone-replace-existing-folder.md).
+const (
+	MsgCloneReplaceFree       = "  [clone] target free, cloning directly into %s\n"
+	MsgCloneReplaceExists     = "  [clone] target exists: %s\n"
+	MsgCloneReplaceStrategy1  = "  [clone] strategy 1/2 — direct remove + clone"
+	MsgCloneReplaceStrat1Fail = "  [clone] strategy 1/2 failed: %v\n"
+	MsgCloneReplaceStrategy2  = "  [clone] strategy 2/2 — temp-clone then swap-in-place"
+	MsgCloneReplaceTempClone  = "  [clone] cloning into %s\n"
+	MsgCloneReplaceEmptying   = "  [clone] emptying target contents (%d entries) in %s\n"
+	MsgCloneReplaceMoving     = "  [clone] moving %d entries from temp into target\n"
+	MsgCloneReplaceSwapDone   = "  [clone] swap complete; target now points at fresh clone"
+	WarnCloneReplaceEntryFail = "  [clone] could not remove %s: %v\n"
+	FlagDescCloneNoReplace    = "Abort if the target folder already exists (disables replace)"
+)
+
 // VS Code integration messages.
 const (
 	VSCodeBin             = "code"
