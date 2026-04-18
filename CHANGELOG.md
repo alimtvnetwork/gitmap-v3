@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.94.0 — (2026-04-18)
+
+### Fixed
+
+- `Get-LastRelease.ps1` reported the OLDEST version (e.g. `v2.82.0`) because `list-versions --limit 1` returns ascending order. Now sorts all versions descending and falls back to the binary's own `version` output if needed.
+- Stale active PATH binary (e.g. `E:\bin-run\gitmap.exe`) is no longer kept alive by copying the new build into it. New `Migrate-StaleActiveBinary` helper deletes the stale binary, removes empty parent dirs, and strips the location from user PATH so future shells use the wrapped deploy target only.
+- `powershell.json` `deployPath` is now rewritten after every successful deploy via `Sync-ConfigDeployPath` so the "Config binary:" readout reflects the actual install location and future runs default to the same target.
+
 ## v2.83.0 — (2026-04-16)
 
 ### Fixed

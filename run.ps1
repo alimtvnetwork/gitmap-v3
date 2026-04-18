@@ -970,6 +970,110 @@ function Register-OnPath {
     }
 }
 
+# -- Remove a directory entry from user PATH (DFD-8) -----------
+function Remove-FromUserPath {
+    param([string]$DirToRemove)
+
+    if ([string]::IsNullOrWhiteSpace($DirToRemove)) { return }
+    $normalized = $DirToRemove.TrimEnd('\')
+
+    $sessionParts = ($env:Path -split ';') | Where-Object { $_ -and ($_.TrimEnd('\') -ine $normalized) }
+    $env:Path = ($sessionParts -join ';')
+
+    try {
+        $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+        if (-not $userPath) { return }
+        $userParts = ($userPath -split ';') | Where-Object { $_ -and ($_.TrimEnd('\') -ine $normalized) }
+        $newUserPath = ($userParts -join ';')
+        if ($newUserPath -ne $userPath) {
+            [Environment]::SetEnvironmentVariable('Path', $newUserPath, 'User')
+            Write-Success "PATH: removed stale entry -> $normalized"
+        }
+    } catch {
+        Write-Warn "PATH: could not edit user PATH: $_"
+    }
+}
+
+# -- Migrate a stale active gitmap binary off-target (DFD-8) ---
+# When the binary on PATH lives outside the resolved deploy target, the
+# old behaviour was to copy the new build *into* the stale location,
+# preserving the wrong path forever. Instead: delete the stale binary,
+# remove its parent dir if it is now empty, and strip its directory
+# from the user PATH.
+function Migrate-StaleActiveBinary {
+    param(
+        [string]$StaleBinaryPath,
+        [string]$DeployedAppDir,
+        [string]$BinaryName
+    )
+
+    if (-not (Test-Path $StaleBinaryPath)) { return }
+
+    $staleDir = Split-Path $StaleBinaryPath -Parent
+    $staleResolved = (Resolve-Path $staleDir).Path.TrimEnd('\')
+    $deployResolved = (Resolve-Path $DeployedAppDir).Path.TrimEnd('\')
+    if ($staleResolved -ieq $deployResolved) { return }
+
+    Write-Warn "PATH: stale active binary detected -> $StaleBinaryPath"
+    Write-Info "PATH: migrating away from stale location"
+
+    foreach ($pat in @($BinaryName, "$BinaryName.old", "$($BinaryName.Replace('.exe',''))-update-*.exe")) {
+        $hits = Get-ChildItem -Path $staleDir -Filter $pat -File -ErrorAction SilentlyContinue
+        foreach ($f in $hits) {
+            try {
+                Remove-Item $f.FullName -Force -ErrorAction Stop
+                Write-Info "[cleanup] removed stale $($f.FullName)"
+            } catch {
+                Write-Warn "[cleanup] could not remove $($f.FullName): $_"
+            }
+        }
+    }
+
+    # Walk upward removing now-empty gitmap-owned dirs.
+    $cursor = $staleDir
+    for ($i = 0; $i -lt 3; $i++) {
+        if (-not (Test-Path $cursor)) { break }
+        $remaining = Get-ChildItem -Path $cursor -Force -ErrorAction SilentlyContinue
+        if ($remaining -and $remaining.Count -gt 0) { break }
+        try {
+            Remove-Item $cursor -Force -Recurse -ErrorAction Stop
+            Write-Info "[cleanup] removed empty stale dir $cursor"
+        } catch {
+            Write-Warn "[cleanup] could not remove $cursor : $_"
+            break
+        }
+        $cursor = Split-Path $cursor -Parent
+    }
+
+    Remove-FromUserPath -DirToRemove $staleResolved
+    $staleParent = Split-Path $staleResolved -Parent
+    if ($staleParent -and ($staleParent.TrimEnd('\') -ne ([System.IO.Path]::GetPathRoot($staleParent).TrimEnd('\')))) {
+        Remove-FromUserPath -DirToRemove $staleParent
+    }
+}
+
+# -- Persist resolved deploy target back to powershell.json (DFD-9)
+function Sync-ConfigDeployPath {
+    param([string]$EffectiveDeployTarget)
+
+    $configPath = Join-Path $GitMapDir "powershell.json"
+    if (-not (Test-Path $configPath)) { return }
+
+    try {
+        $raw = Get-Content $configPath -Raw
+        $cfg = $raw | ConvertFrom-Json
+        $existing = "$($cfg.deployPath)".TrimEnd('\')
+        $resolved = $EffectiveDeployTarget.TrimEnd('\')
+        if ($existing -ieq $resolved) { return }
+
+        $cfg.deployPath = $resolved
+        ($cfg | ConvertTo-Json -Depth 10) | Set-Content -Path $configPath -Encoding UTF8
+        Write-Success "Config: powershell.json deployPath updated -> $resolved"
+    } catch {
+        Write-Warn "Config: could not update powershell.json: $_"
+    }
+}
+
 
 # -- Run gitmap ------------------------------------------------
 function Invoke-Run {
@@ -1156,7 +1260,12 @@ if (-not $NoDeploy) {
     Deploy-Binary -Config $config -BinaryPath $binaryPath -OverridePath $DeployPath
 
     $effectiveDeployPath = Resolve-DeployTarget -Config $config -OverridePath $DeployPath
-    $deployedBinaryPath = Join-Path (Join-Path $effectiveDeployPath "gitmap") $config.binaryName
+    $deployedAppDir = Join-Path $effectiveDeployPath "gitmap"
+    $deployedBinaryPath = Join-Path $deployedAppDir $config.binaryName
+
+    # Persist the resolved target so future runs (and the config-binary
+    # readout below) reflect reality (DFD-9).
+    Sync-ConfigDeployPath -EffectiveDeployTarget $effectiveDeployPath
 
     $activeCmd = Get-Command gitmap -ErrorAction SilentlyContinue
     if ($activeCmd -and (Test-Path $deployedBinaryPath)) {
@@ -1164,99 +1273,22 @@ if (-not $NoDeploy) {
         if (Test-Path $activeBinaryPath) {
             $activeResolved = (Resolve-Path $activeBinaryPath).Path
             $deployedResolved = (Resolve-Path $deployedBinaryPath).Path
-            if ($activeResolved -ne $deployedResolved) {
+            if ($activeResolved -ine $deployedResolved) {
                 Write-Warn "PATH points to a different gitmap binary."
                 Write-Info "Active:   $activeResolved"
                 Write-Info "Deployed: $deployedResolved"
 
-                $maxSyncAttempts = 20
-                $syncSuccess = $false
+                # New behaviour (DFD-8): do NOT copy the new build into the
+                # stale location — that perpetuates the wrong path. Delete
+                # the stale binary, prune empty parents, and strip the dir
+                # from user PATH. The deployed dir is already on PATH via
+                # Register-OnPath above.
+                Migrate-StaleActiveBinary `
+                    -StaleBinaryPath $activeBinaryPath `
+                    -DeployedAppDir $deployedAppDir `
+                    -BinaryName $config.binaryName
 
-                if ($Update) {
-                    Write-Info "Update mode: using rename-first PATH sync"
-                    $activeBackup = "$activeBinaryPath.old"
-                    try {
-                        if (Test-Path $activeBackup) {
-                            Remove-Item $activeBackup -Force -ErrorAction SilentlyContinue
-                        }
-                        Rename-Item $activeBinaryPath $activeBackup -Force -ErrorAction Stop
-                        Copy-Item $deployedBinaryPath $activeBinaryPath -Force -ErrorAction Stop
-                        $syncedVersion = & $activeBinaryPath version 2>&1
-                        Write-Success "Synced active PATH binary via rename-first -> $syncedVersion"
-                        $syncSuccess = $true
-                    } catch {
-                        if ((Test-Path $activeBackup) -and (-not (Test-Path $activeBinaryPath))) {
-                            try {
-                                Copy-Item $activeBackup $activeBinaryPath -Force -ErrorAction Stop
-                            } catch {
-                            }
-                        }
-                        Write-Warn "Rename-first sync failed; retrying with copy loop"
-                    }
-                }
-
-                if (-not $syncSuccess) {
-                    for ($syncAttempt = 1; $syncAttempt -le $maxSyncAttempts; $syncAttempt++) {
-                        try {
-                            Copy-Item $deployedBinaryPath $activeBinaryPath -Force -ErrorAction Stop
-                            $syncedVersion = & $activeBinaryPath version 2>&1
-                            Write-Success "Synced active PATH binary -> $syncedVersion"
-                            $syncSuccess = $true
-                            break
-                        } catch {
-                            if ($syncAttempt -lt $maxSyncAttempts) {
-                                Write-Warn "Active PATH binary is in use; retrying ($syncAttempt/$maxSyncAttempts)..."
-                                Start-Sleep -Milliseconds 500
-                            }
-                        }
-                    }
-                }
-
-                if (-not $syncSuccess) {
-                    $activeBackup = "$activeBinaryPath.old"
-                    try {
-                        if (Test-Path $activeBackup) {
-                            Remove-Item $activeBackup -Force -ErrorAction SilentlyContinue
-                        }
-                        Rename-Item $activeBinaryPath $activeBackup -Force -ErrorAction Stop
-                        Copy-Item $deployedBinaryPath $activeBinaryPath -Force -ErrorAction Stop
-                        $syncedVersion = & $activeBinaryPath version 2>&1
-                        Write-Success "Synced active PATH binary via rename fallback -> $syncedVersion"
-                        $syncSuccess = $true
-                    } catch {
-                        if ((Test-Path $activeBackup) -and (-not (Test-Path $activeBinaryPath))) {
-                            try {
-                                Copy-Item $activeBackup $activeBinaryPath -Force -ErrorAction Stop
-                            } catch {
-                            }
-                        }
-                    }
-                }
-
-                if (-not $syncSuccess) {
-                    try {
-                        $staleProcs = Get-CimInstance Win32_Process -Filter "Name='gitmap.exe'" -ErrorAction SilentlyContinue |
-                            Where-Object { $_.ExecutablePath -and ((Resolve-Path $_.ExecutablePath -ErrorAction SilentlyContinue).Path -eq $activeResolved) -and ($_.ProcessId -ne $PID) }
-                        foreach ($p in $staleProcs) {
-                            Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
-                        }
-                        if ($staleProcs) {
-                            Start-Sleep -Milliseconds 500
-                            Copy-Item $deployedBinaryPath $activeBinaryPath -Force -ErrorAction Stop
-                            $syncedVersion = & $activeBinaryPath version 2>&1
-                            Write-Success "Synced active PATH binary after stopping stale gitmap process(es) -> $syncedVersion"
-                            $syncSuccess = $true
-                        }
-                    } catch {
-                    }
-                }
-
-                if (-not $syncSuccess) {
-                    Write-Warn "Could not sync active PATH binary after retries and fallback attempts."
-                    Write-Info "Close terminals/apps using gitmap and run:"
-                    Write-Info ('Copy-Item "' + $deployedBinaryPath + '" "' + $activeBinaryPath + '" -Force')
-                    Write-Info ('Or run directly: "' + $deployedBinaryPath + '" <command>')
-                }
+                Write-Info "PATH: open a NEW shell to pick up '$deployedAppDir'"
             }
         }
     }
