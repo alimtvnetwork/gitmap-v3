@@ -56,6 +56,80 @@ step()  { printf '  \033[36m%s\033[0m\n' "$*" >&2; }
 ok()    { printf '  \033[32m%s\033[0m\n' "$*" >&2; }
 err()   { printf '  \033[31m%s\033[0m\n' "$*" >&2; }
 
+# ── Versioned repo discovery ────────────────────────────────────────
+# spec/01-app/95-installer-script-find-latest-repo.md
+
+# Parses "<owner>/<stem>-v<N>". Sets SUFFIX_OWNER, SUFFIX_STEM, SUFFIX_N.
+parse_repo_suffix() {
+    local repo="$1"
+    if [[ "$repo" =~ ^([^/]+)/(.+)-v([0-9]+)$ ]]; then
+        SUFFIX_OWNER="${BASH_REMATCH[1]}"
+        SUFFIX_STEM="${BASH_REMATCH[2]}"
+        SUFFIX_N="${BASH_REMATCH[3]}"
+        return 0
+    fi
+    return 1
+}
+
+repo_exists() {
+    curl -sfI --max-time 5 "$1" >/dev/null 2>&1
+}
+
+# Echoes the effective "<owner>/<stem>-v<M>" (or original repo when none higher).
+resolve_effective_repo() {
+    local repo="$1" ceiling="$2"
+    if ! parse_repo_suffix "$repo"; then
+        printf '  [discovery] no -v<N> suffix on '"'"'%s'"'"'; installing baseline as-is\n' "$repo" >&2
+        echo "$repo"
+        return 0
+    fi
+
+    local owner="$SUFFIX_OWNER" stem="$SUFFIX_STEM" baseline="$SUFFIX_N"
+    local effective="$baseline" m url
+
+    printf '  [discovery] baseline: %s/%s-v%s\n' "$owner" "$stem" "$baseline" >&2
+    printf '  [discovery] probe ceiling: %s\n' "$ceiling" >&2
+
+    for (( m = baseline + 1; m <= ceiling; m++ )); do
+        url="https://github.com/${owner}/${stem}-v${m}"
+        if repo_exists "$url"; then
+            printf '  [discovery] HEAD %s ... HIT\n' "$url" >&2
+            effective=$m
+        else
+            printf '  [discovery] HEAD %s ... MISS (fail-fast)\n' "$url" >&2
+            break
+        fi
+    done
+
+    if [ "$effective" = "$baseline" ]; then
+        printf '  [discovery] no higher version found; using baseline -v%s\n' "$baseline" >&2
+        echo "$repo"
+    else
+        printf '  [discovery] effective: %s/%s-v%s (was -v%s)\n' "$owner" "$stem" "$effective" "$baseline" >&2
+        echo "${owner}/${stem}-v${effective}"
+    fi
+}
+
+# Re-exec the full installer from the effective repo, passing through flags.
+invoke_delegated_full_installer() {
+    local effective_repo="$1"
+    shift
+    local delegated_url="https://raw.githubusercontent.com/${effective_repo}/main/gitmap/scripts/install.sh"
+    printf '  [discovery] delegating to %s\n' "$delegated_url" >&2
+
+    export INSTALLER_DELEGATED=1
+
+    local script
+    if ! script="$(curl -fsSL --max-time 15 "$delegated_url")"; then
+        printf '  [discovery] [WARN] could not fetch delegated installer; falling back to baseline\n' >&2
+        unset INSTALLER_DELEGATED
+        return 1
+    fi
+
+    bash -c "$script" _ "$@"
+    exit $?
+}
+
 # ── Detect OS ───────────────────────────────────────────────────────
 
 detect_os() {
