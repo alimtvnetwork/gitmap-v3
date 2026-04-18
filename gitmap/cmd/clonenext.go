@@ -70,12 +70,27 @@ func runCloneNext(args []string) {
 	flattenedFolder := parsed.BaseName
 	targetPath := filepath.Join(parentDir, flattenedFolder)
 
-	// If the flattened folder already exists, remove it for fresh clone.
+	// If the flattened folder already exists, try to remove it for a fresh clone.
+	// On Windows, the current shell's working directory is locked and cannot be
+	// removed by this process. In that case, fall back to a versioned folder name
+	// (e.g. scripts-fixer-v2) and warn — never abort the whole flow.
 	if _, statErr := os.Stat(targetPath); statErr == nil {
 		fmt.Printf(constants.MsgFlattenRemoving, flattenedFolder)
 		if removeErr := os.RemoveAll(targetPath); removeErr != nil {
 			fmt.Fprintf(os.Stderr, constants.WarnCloneNextRemoveFailed, flattenedFolder, removeErr)
-			os.Exit(1)
+			fallbackFolder := targetName
+			fallbackPath := filepath.Join(parentDir, fallbackFolder)
+			fmt.Printf(constants.MsgFlattenFallback, fallbackFolder)
+			fmt.Printf(constants.MsgFlattenLockedHint, flattenedFolder)
+			// If the versioned fallback also exists, attempt to remove it; if that
+			// fails too, warn but continue — git clone will surface a clear error.
+			if _, fbStat := os.Stat(fallbackPath); fbStat == nil {
+				if fbErr := os.RemoveAll(fallbackPath); fbErr != nil {
+					fmt.Fprintf(os.Stderr, constants.WarnCloneNextRemoveFailed, fallbackFolder, fbErr)
+				}
+			}
+			flattenedFolder = fallbackFolder
+			targetPath = fallbackPath
 		}
 	}
 
