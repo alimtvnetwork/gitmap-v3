@@ -95,10 +95,6 @@ func doMove(left, right Endpoint, opts Options, logger *Logger) error {
 
 // doMergeBoth implements `gitmap merge-both`.
 func doMergeBoth(left, right Endpoint, opts Options, logger *Logger) error {
-	autoMode := opts.AutoMode
-	if autoMode == "" && opts.NoCommit { // -y default for merge-both = newer
-		autoMode = constants.PreferNewer
-	}
 	if err := runMergeFlow(left, right, opts, logger, mergeFlowConfig{
 		WriteLeft: true, WriteRight: true, DefaultAuto: constants.PreferNewer,
 	}); err != nil {
