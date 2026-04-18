@@ -492,17 +492,36 @@ add_path_to_profile() {
 
     local marker_open="# gitmap shell wrapper v2 - managed by gitmap installer. Do not edit manually."
     local marker_close="# gitmap shell wrapper v2 end"
-    local snippet
-    if [ "${is_fish}" = true ]; then
-        snippet="${marker_open}
+
+    # Single-source-of-truth: ask the freshly-installed gitmap binary
+    # for the canonical snippet bytes. Falls back to an inline heredoc
+    # if the binary isn't on PATH yet (called before install_binary
+    # completed).
+    local snippet=""
+    local snippet_shell="bash"
+    [ "${is_fish}" = true ] && snippet_shell="fish"
+    local gitmap_bin=""
+    if [ -x "${INSTALL_DIR:-}/gitmap" ]; then
+        gitmap_bin="${INSTALL_DIR}/gitmap"
+    elif command -v gitmap >/dev/null 2>&1; then
+        gitmap_bin="$(command -v gitmap)"
+    fi
+    if [ -n "${gitmap_bin}" ]; then
+        snippet="$("${gitmap_bin}" setup print-path-snippet \
+            --shell "${snippet_shell}" --dir "${dir}" --manager "installer" 2>/dev/null || true)"
+    fi
+    if [ -z "${snippet}" ]; then
+        if [ "${is_fish}" = true ]; then
+            snippet="${marker_open}
 set -gx GITMAP_WRAPPER 1
 fish_add_path ${dir}
 ${marker_close}"
-    else
-        snippet="${marker_open}
+        else
+            snippet="${marker_open}
 export GITMAP_WRAPPER=1
 case \":\${PATH}:\" in *\":${dir}:\"*) ;; *) export PATH=\"\$PATH:${dir}\" ;; esac
 ${marker_close}"
+        fi
     fi
 
     mkdir -p "$(dirname "${profile_file}")"

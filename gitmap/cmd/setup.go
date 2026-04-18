@@ -14,6 +14,15 @@ import (
 
 // runSetup handles the "setup" subcommand.
 func runSetup(args []string) {
+	// Subcommand: `gitmap setup print-path-snippet ...`
+	// Used by run.sh + install.sh to fetch the canonical marker-block
+	// snippet so all three drivers emit byte-identical output.
+	if len(args) > 0 && args[0] == "print-path-snippet" {
+		runPrintPathSnippet(args[1:])
+
+		return
+	}
+
 	checkHelp("setup", args)
 	configPath, dryRun, hasConfig := parseSetupFlags(args)
 	configPath = resolveSetupConfigPath(configPath, hasConfig)
@@ -22,9 +31,56 @@ func runSetup(args []string) {
 	result := setup.Apply(cfg, dryRun)
 	installShellCompletion(dryRun)
 	installCDFunction(dryRun)
+	installPathSnippet(dryRun)
 	ensureGitignoreStep(dryRun)
 	verifyShellWrapper(dryRun)
 	printSetupSummary(result)
+}
+
+// installPathSnippet writes the canonical marker-block PATH snippet to
+// the user's profile so future shells pick up the gitmap install dir.
+// Idempotent: rewrites the existing block if present, otherwise appends.
+func installPathSnippet(dryRun bool) {
+	shell := completion.DetectShell()
+	fmt.Printf("\n  %s%s%s\n", constants.ColorYellow, "PATH snippet:", constants.ColorReset)
+
+	dir := resolveActiveBinaryDir()
+	if len(dir) == 0 {
+		fmt.Fprintf(os.Stderr, "  %sskipped: could not resolve active gitmap directory%s\n",
+			constants.ColorYellow, constants.ColorReset)
+
+		return
+	}
+
+	if dryRun {
+		fmt.Printf("  %s[dry-run]%s would write PATH snippet for %s -> %s\n",
+			constants.ColorDim, constants.ColorReset, shell, dir)
+
+		return
+	}
+
+	res, err := setup.WritePathSnippet(shell, dir, "gitmap setup", "")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "  %s%v%s\n", constants.ColorYellow, err, constants.ColorReset)
+
+		return
+	}
+	fmt.Printf("  %s%s%s -> %s\n", constants.ColorGreen, res.Action, constants.ColorReset, res.Profile)
+}
+
+// resolveActiveBinaryDir returns the directory containing the running
+// gitmap binary, used as the PATH entry to inject.
+func resolveActiveBinaryDir() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	resolved, err := filepath.EvalSymlinks(exe)
+	if err != nil {
+		resolved = exe
+	}
+
+	return filepath.Dir(resolved)
 }
 
 // installShellCompletion detects the shell and installs completions.
