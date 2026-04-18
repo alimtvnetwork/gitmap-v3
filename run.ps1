@@ -662,12 +662,19 @@ function Deploy-Binary {
         Write-Info "Created deploy directory"
     }
 
-    # Deploy into nested gitmap/ subfolder
+    # Migrate any legacy unwrapped layout (DFD-3) BEFORE we resolve $appDir.
+    Repair-DeployLayout -DeployTarget $target -BinaryName $Config.binaryName
+
+    # Deploy into nested gitmap/ subfolder (DFD-1)
     $appDir = Join-Path $target "gitmap"
     if (-not (Test-Path $appDir)) {
         New-Item -ItemType Directory -Path $appDir -Force | Out-Null
         Write-Info "Created gitmap app directory"
     }
+
+    # Pre-deploy cleanup (DFD-6) — runs BEFORE the new binary is copied
+    # so a locked .old file can't block the deploy.
+    Invoke-DeployCleanup -DeployTarget $target -AppDir $appDir -BinaryName $Config.binaryName
 
     $destFile = Join-Path $appDir $Config.binaryName
     $backupFile = "$destFile.old"
@@ -725,9 +732,14 @@ function Deploy-Binary {
         }
     }
 
-    # Leave .old file in place - cleaned up by: gitmap update-cleanup
-    if ($hasBackup -and $deploySuccess) {
-        Write-Info "Previous binary kept as $($Config.binaryName).old (run 'gitmap update-cleanup' to remove)"
+    # Post-deploy: remove the .old immediately now that the new binary is in place.
+    if ($hasBackup -and $deploySuccess -and (Test-Path $backupFile)) {
+        try {
+            Remove-Item $backupFile -Force -ErrorAction Stop
+            Write-Info "Removed .old backup ($($Config.binaryName).old)"
+        } catch {
+            Write-Warn "Could not remove .old backup: $_ (will be cleaned on next deploy)"
+        }
     }
 
     $binDir   = Split-Path $BinaryPath -Parent
@@ -744,10 +756,9 @@ function Deploy-Binary {
     Copy-DocsSite -AppDir $appDir
 
     Write-Success "Deployed to $appDir"
-    Write-Info "Ensure $appDir is on your PATH to run: gitmap"
 
-    # Install drive-root forwarding shim (e.g. E:\gitmap.exe -> E:\bin-run\gitmap\gitmap.exe)
-    Install-RootShim -DeployTarget $target -RealBinary $destFile -BinaryName $Config.binaryName
+    # Register the app folder on user PATH and refresh the current session (DFD-4, DFD-5).
+    Register-OnPath -AppDir $appDir
 
     # Sync source repo path in DB so "gitmap update" uses this repo location
     $syncBinary = $destFile
@@ -762,74 +773,203 @@ function Deploy-Binary {
     }
 }
 
-# -- Install drive-root forwarding shim ------------------------
-# Builds <drive>:\gitmap.exe (or named binary) that forwards to the real
-# binary inside <deployPath>\gitmap\. The shim path is baked in via -ldflags.
-# Skipped on non-Windows or when the deploy target has no drive letter.
-function Install-RootShim {
+# -- Repair legacy unwrapped layout (DFD-3) --------------------
+# If <DeployTarget>\<binaryName> exists at the top level (not nested
+# under <DeployTarget>\gitmap\), move it + sibling data/ into the
+# gitmap/ subfolder. Idempotent.
+function Repair-DeployLayout {
     param(
         [string]$DeployTarget,
-        [string]$RealBinary,
+        [string]$BinaryName
+    )
+
+    $legacyBinary = Join-Path $DeployTarget $BinaryName
+    $appDir = Join-Path $DeployTarget "gitmap"
+    $wrappedBinary = Join-Path $appDir $BinaryName
+
+    if (-not (Test-Path $legacyBinary)) {
+        Write-Info "Layout: OK (no legacy binary at $DeployTarget)"
+        return
+    }
+    if (Test-Path $wrappedBinary) {
+        # Both exist — wrapped wins; the legacy copy is leftover. Remove it.
+        try {
+            Remove-Item $legacyBinary -Force -ErrorAction Stop
+            Write-Info "Layout: removed leftover legacy binary at $legacyBinary"
+        } catch {
+            Write-Warn "Layout: could not remove legacy binary $legacyBinary : $_"
+        }
+        return
+    }
+
+    Write-Info "Layout: migrating legacy unwrapped install -> $appDir"
+    if (-not (Test-Path $appDir)) {
+        New-Item -ItemType Directory -Path $appDir -Force | Out-Null
+    }
+
+    foreach ($name in @($BinaryName, "data", "CHANGELOG.md", "docs")) {
+        $src = Join-Path $DeployTarget $name
+        $dst = Join-Path $appDir $name
+        if (-not (Test-Path $src)) { continue }
+        if (Test-Path $dst) {
+            Write-Info "Layout: $name already inside gitmap/, skipping move"
+            continue
+        }
+        try {
+            Move-Item -Path $src -Destination $dst -Force -ErrorAction Stop
+            Write-Info "Layout: moved $name -> gitmap\$name"
+        } catch {
+            Write-Warn "Layout: could not move $name : $_"
+        }
+    }
+}
+
+# -- Pre-deploy cleanup (DFD-6, DFD-7) -------------------------
+# Removes prior-deploy artifacts before the new binary is copied:
+#   *.old, *-update-*.exe, updater-tmp-*.exe, temp *-update-*.ps1,
+#   *.gitmap-tmp-* swap dirs, and the obsolete drive-root shim.
+function Invoke-DeployCleanup {
+    param(
+        [string]$DeployTarget,
+        [string]$AppDir,
+        [string]$BinaryName
+    )
+
+    $removed = 0
+    $scanDirs = @($DeployTarget, $AppDir) | Where-Object { Test-Path $_ } | Select-Object -Unique
+    $patterns = @("*.old", "$($BinaryName.Replace('.exe',''))-update-*.exe",
+                  "$($BinaryName.Replace('.exe',''))-update-*", "updater-tmp-*.exe")
+
+    foreach ($dir in $scanDirs) {
+        foreach ($pat in $patterns) {
+            $matches = Get-ChildItem -Path $dir -Filter $pat -File -ErrorAction SilentlyContinue
+            foreach ($f in $matches) {
+                try {
+                    Remove-Item $f.FullName -Force -ErrorAction Stop
+                    Write-Info "[cleanup] removed $($f.FullName)"
+                    $removed++
+                } catch {
+                    Write-Warn "[cleanup] could not remove $($f.FullName): $_"
+                }
+            }
+        }
+    }
+
+    # Temp dir scripts
+    $tempScripts = Get-ChildItem -Path $env:TEMP -Filter "$($BinaryName.Replace('.exe',''))-update-*.ps1" -File -ErrorAction SilentlyContinue
+    foreach ($f in $tempScripts) {
+        try {
+            Remove-Item $f.FullName -Force -ErrorAction Stop
+            Write-Info "[cleanup] removed temp script $($f.FullName)"
+            $removed++
+        } catch {
+            Write-Warn "[cleanup] could not remove $($f.FullName): $_"
+        }
+    }
+
+    # *.gitmap-tmp-* swap directories left by interrupted clones
+    $tmpParents = @($DeployTarget) | Where-Object { Test-Path $_ }
+    foreach ($parent in $tmpParents) {
+        $swaps = Get-ChildItem -Path $parent -Directory -Filter "*.gitmap-tmp-*" -ErrorAction SilentlyContinue
+        foreach ($d in $swaps) {
+            try {
+                Remove-Item $d.FullName -Recurse -Force -ErrorAction Stop
+                Write-Info "[cleanup] removed swap dir $($d.FullName)"
+                $removed++
+            } catch {
+                Write-Warn "[cleanup] could not remove $($d.FullName): $_"
+            }
+        }
+    }
+
+    # Drive-root shim from v2.90.0 (DFD-7)
+    Remove-DriveRootShim -DeployTarget $DeployTarget -BinaryName $BinaryName | ForEach-Object { $removed += $_ }
+
+    if ($removed -gt 0) {
+        Write-Success "[cleanup] removed $removed artifact(s)"
+    } else {
+        Write-Info "[cleanup] nothing to clean"
+    }
+}
+
+# -- Remove obsolete drive-root shim (DFD-7) -------------------
+# In v2.90.0 we wrote <drive>:\gitmap.exe as a forwarding shim. That
+# pattern is now removed. Detect and delete it if present, but never
+# touch a binary that lives inside a gitmap\ folder.
+function Remove-DriveRootShim {
+    param(
+        [string]$DeployTarget,
         [string]$BinaryName
     )
 
     $drive = [System.IO.Path]::GetPathRoot($DeployTarget)
     if ([string]::IsNullOrWhiteSpace($drive) -or $drive -notmatch '^[A-Za-z]:\\$') {
-        Write-Info "Root shim: skipped (deploy target has no drive root: $DeployTarget)"
-        return
+        return 0
     }
 
-    $shimSource = Join-Path $GitMapDir "scripts\shim"
-    if (-not (Test-Path (Join-Path $shimSource "main.go"))) {
-        Write-Warn "Root shim: source not found at $shimSource; skipping"
-        return
+    $shimPath = Join-Path $drive $BinaryName
+    if (-not (Test-Path $shimPath)) { return 0 }
+
+    $shimDir = Split-Path $shimPath -Parent
+    # Safety: only remove if it sits at the literal drive root and not inside a gitmap/ folder.
+    if ((Split-Path $shimDir -Leaf) -eq "gitmap") {
+        return 0
     }
 
-    $shimDest = Join-Path $drive $BinaryName
-    Write-Info "Root shim: building $shimDest -> $RealBinary"
-
-    # Skip rebuild if shim is newer than its target (cheap idempotency).
-    if (Test-Path $shimDest) {
-        $shimAge = (Get-Item $shimDest).LastWriteTimeUtc
-        $realAge = (Get-Item $RealBinary).LastWriteTimeUtc
-        if ($shimAge -ge $realAge) {
-            Write-Info "Root shim: already up to date ($shimDest)"
-            return
-        }
+    $size = (Get-Item $shimPath).Length
+    if ($size -gt 5MB) {
+        Write-Warn "[cleanup] skipping drive-root $shimPath (size $size > 5MB; likely unrelated)"
+        return 0
     }
 
-    # Bake the absolute target path into the shim binary.
-    $escapedTarget = $RealBinary -replace '\\', '\\'
-    $ldflags = "-s -w -X main.target=$escapedTarget"
-
-    Push-Location $GitMapDir
     try {
-        $prevEAP = $ErrorActionPreference
-        $ErrorActionPreference = 'Continue'
-        try {
-            $shimOutput = & go build -ldflags $ldflags -o $shimDest ./scripts/shim 2>&1
-            $shimExit = $LASTEXITCODE
-        } finally {
-            $ErrorActionPreference = $prevEAP
-        }
-
-        if ($shimExit -ne 0) {
-            Write-Warn "Root shim: build failed (exit $shimExit); skipping"
-            foreach ($line in $shimOutput) {
-                $text = "$line".Trim()
-                if ($text.Length -gt 0) { Write-Host "  $text" -ForegroundColor Yellow }
-            }
-            return
-        }
-    } finally {
-        Pop-Location
-    }
-
-    if (Test-Path $shimDest) {
-        $size = (Get-Item $shimDest).Length / 1KB
-        Write-Success ("Root shim installed: {0} ({1:N1} KB)" -f $shimDest, $size)
+        Remove-Item $shimPath -Force -ErrorAction Stop
+        Write-Info "[cleanup] removed obsolete drive-root shim $shimPath"
+        return 1
+    } catch {
+        Write-Warn "[cleanup] could not remove drive-root shim $shimPath : $_"
+        return 0
     }
 }
+
+# -- Register on user PATH + refresh current session (DFD-4) ---
+function Register-OnPath {
+    param([string]$AppDir)
+
+    if (-not (Test-Path $AppDir)) {
+        Write-Warn "PATH: skipping (app dir does not exist: $AppDir)"
+        return
+    }
+
+    $resolved = (Resolve-Path $AppDir).Path.TrimEnd('\')
+
+    # Refresh current session unconditionally so the binary is callable now.
+    $currentEntries = ($env:Path -split ';') | Where-Object { $_ -and ($_.TrimEnd('\') -ieq $resolved) }
+    if (-not $currentEntries) {
+        $env:Path = "$env:Path;$resolved"
+        Write-Info "PATH: appended to current session -> $resolved"
+    } else {
+        Write-Info "PATH: already in current session"
+    }
+
+    # Persist to user-scope PATH (idempotent).
+    try {
+        $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+        if (-not $userPath) { $userPath = "" }
+        $userEntries = ($userPath -split ';') | Where-Object { $_ -and ($_.TrimEnd('\') -ieq $resolved) }
+        if ($userEntries) {
+            Write-Info "PATH: already in user PATH"
+            return
+        }
+        $newUserPath = if ($userPath.Length -gt 0) { "$userPath;$resolved" } else { $resolved }
+        [Environment]::SetEnvironmentVariable('Path', $newUserPath, 'User')
+        Write-Success "PATH: persisted to user PATH -> $resolved"
+        Write-Info "PATH: open a NEW shell, or run '. `$PROFILE' in PowerShell, to pick it up everywhere"
+    } catch {
+        Write-Warn "PATH: could not persist to user PATH: $_"
+    }
+}
+
 
 # -- Run gitmap ------------------------------------------------
 function Invoke-Run {

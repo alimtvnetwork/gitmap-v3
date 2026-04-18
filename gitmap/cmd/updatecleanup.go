@@ -14,6 +14,8 @@ func runUpdateCleanup() {
 	ctx := loadUpdateCleanupContext()
 	total := cleanupTempArtifacts(ctx)
 	total += cleanupBackupArtifacts(ctx)
+	total += cleanupDriveRootShim(ctx)
+	total += cleanupCloneSwapDirs(ctx)
 	printUpdateCleanupResult(total)
 }
 
