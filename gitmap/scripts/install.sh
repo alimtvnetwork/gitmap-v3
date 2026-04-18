@@ -482,22 +482,43 @@ install_docs_site() {
 
 # add_path_to_profile writes an export line to a single profile file (idempotent).
 # Returns 0 if written, 1 if already present.
+# add_path_to_profile writes a marker-block snippet (per
+# spec/04-generic-cli/21-post-install-shell-activation) to a single
+# profile file. Idempotent: rewrites the existing block if present.
+# Returns 0 if written, 1 if no-op.
 add_path_to_profile() {
     local dir="$1" profile_file="$2" is_fish="$3"
 
-    local path_line
+    local marker_open="# gitmap shell wrapper v2 - managed by gitmap installer. Do not edit manually."
+    local marker_close="# gitmap shell wrapper v2 end"
+    local snippet
     if [ "${is_fish}" = true ]; then
-        path_line="fish_add_path ${dir}"
+        snippet="${marker_open}
+set -gx GITMAP_WRAPPER 1
+fish_add_path ${dir}
+${marker_close}"
     else
-        path_line="export PATH=\"\$PATH:${dir}\""
-    fi
-
-    if [ -f "${profile_file}" ] && grep -qF "${dir}" "${profile_file}"; then
-        return 1
+        snippet="${marker_open}
+export GITMAP_WRAPPER=1
+case \":\${PATH}:\" in *\":${dir}:\"*) ;; *) export PATH=\"\$PATH:${dir}\" ;; esac
+${marker_close}"
     fi
 
     mkdir -p "$(dirname "${profile_file}")"
-    printf '\n# Added by gitmap installer\n%s\n' "${path_line}" >> "${profile_file}"
+    touch "${profile_file}"
+
+    if grep -qF "${marker_open}" "${profile_file}" 2>/dev/null; then
+        local tmp
+        tmp="$(mktemp)"
+        awk -v open="${marker_open}" -v close="${marker_close}" -v body="${snippet}" '
+            $0 == open { skip = 1; print body; next }
+            skip && $0 == close { skip = 0; next }
+            !skip { print }
+        ' "${profile_file}" > "${tmp}" && mv "${tmp}" "${profile_file}"
+        return 1
+    fi
+
+    printf '\n%s\n' "${snippet}" >> "${profile_file}"
     return 0
 }
 
@@ -739,17 +760,18 @@ main() {
     TMP_DIR="$(mktemp -d)"
     archive_path="$(download_asset "${version}" "${os}" "${arch}")"
 
+    APP_DIR=""
     install_binary "${archive_path}" "${install_dir}" "${os}" "${arch}" "${version}"
 
     # Bundle the docs site so `gitmap help-dashboard` works after install.
-    install_docs_site "${version}" "${install_dir}"
+    install_docs_site "${version}" "${APP_DIR}"
 
     if [ "${NO_PATH}" = false ]; then
-        add_to_path "${install_dir}"
+        add_to_path "${APP_DIR}"
     fi
 
     # Verify the binary works
-    local bin_path="${install_dir}/${BINARY_NAME}"
+    local bin_path="${APP_DIR}/${BINARY_NAME}"
     local installed_version="${version}"
     if [ -f "${bin_path}" ]; then
         echo ""
@@ -767,14 +789,14 @@ main() {
     print_install_summary "${installed_version}" "${bin_path}"
     if [ "${NO_PATH}" = false ]; then
         echo ""
-        printf '  \033[32m✓\033[0m  To start using gitmap \033[1mright now\033[0m, run:\n' >&2
+        printf '  \033[32mOK\033[0m  To start using gitmap \033[1mright now\033[0m, run:\n' >&2
         echo "" >&2
         printf '      \033[36m%s\033[0m\n' "${PATH_RELOAD}" >&2
         echo "" >&2
         printf '     Or open a new terminal window.\n' >&2
         echo "" >&2
-        printf '  \033[90mInstalled to: %s\033[0m\n' "${install_dir}/${BINARY_NAME}" >&2
-        printf '  \033[90mPATH added to: %s %s %s %s\033[0m\n' "~/.zshrc" "~/.zprofile" "~/.bashrc" "~/.profile" >&2
+        printf '  \033[90mInstalled to: %s\033[0m\n' "${bin_path}" >&2
+        printf '  \033[90mApp folder on PATH: %s\033[0m\n' "${APP_DIR}" >&2
     fi
 
     echo ""
