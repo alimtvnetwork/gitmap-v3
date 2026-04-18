@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.95.0 — (2026-04-18)
+
+### Added
+
+- `gitmap setup print-path-snippet --shell <bash|zsh|fish|pwsh> --dir <path> --manager <label>` — emits the canonical marker-block PATH snippet to stdout. Used by `run.sh` and `gitmap/scripts/install.sh` so all three drivers produce byte-identical rc-file output. Single source of truth lives in `constants_pathsnippet.go`.
+- `gitmap setup` now writes the marker-block snippet to the user's profile on every run (idempotent: rewrites the existing block in place, otherwise appends after a blank line). Different `--manager` values create coexisting blocks so `run.sh`, `installer`, and `gitmap setup` never overwrite each other.
+- `setup.WritePathSnippet()` and `setup.RenderPathSnippet()` Go helpers with full unit-test coverage (`pathsnippet_test.go`, `pathsnippetwriter_test.go`).
+
+### Changed
+
+- `run.sh::register_on_path` and `gitmap/scripts/install.sh::add_path_to_profile` now ask the freshly-built/installed gitmap binary for snippet bytes via `gitmap setup print-path-snippet`. Inline heredocs remain as a first-run fallback only.
+
 ## v2.94.0 — (2026-04-18)
 
 ### Fixed
