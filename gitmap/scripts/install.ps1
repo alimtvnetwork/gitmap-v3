@@ -33,7 +33,9 @@ param(
     [string]$InstallDir = "",
     [string]$Arch = "",
     [switch]$NoPath,
-    [switch]$Uninstall
+    [switch]$Uninstall,
+    [switch]$NoDiscovery,
+    [int]$ProbeCeiling = 30
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,6 +44,99 @@ $ProgressPreference = "SilentlyContinue"
 $Repo = "alimtvnetwork/gitmap-v3"
 $BinaryName = "gitmap.exe"
 $InstallerVersion = "1.0.0"
+
+# ---------------------------------------------------------------------------
+# Versioned repo discovery (spec/01-app/95-installer-script-find-latest-repo.md)
+# ---------------------------------------------------------------------------
+
+function Split-RepoSuffix([string]$repo) {
+    if ($repo -match '^([^/]+)/(.+)-v(\d+)$') {
+        return @{ Owner = $Matches[1]; Stem = $Matches[2]; N = [int]$Matches[3] }
+    }
+    return $null
+}
+
+function Test-RepoExists([string]$url) {
+    try {
+        $resp = Invoke-WebRequest -Uri $url -Method Head -TimeoutSec 5 `
+            -UseBasicParsing -ErrorAction Stop
+        return ($resp.StatusCode -eq 200)
+    } catch {
+        return $false
+    }
+}
+
+function Resolve-EffectiveRepo([string]$repo, [int]$ceiling) {
+    $parts = Split-RepoSuffix $repo
+    if ($null -eq $parts) {
+        Write-Host "  [discovery] no -v<N> suffix on '$repo'; installing baseline as-is"
+        return $repo
+    }
+
+    $owner = $parts.Owner; $stem = $parts.Stem; $baseline = $parts.N
+    $effective = $baseline
+
+    Write-Host "  [discovery] baseline: $owner/$stem-v$baseline"
+    Write-Host "  [discovery] probe ceiling: $ceiling"
+
+    for ($m = $baseline + 1; $m -le $ceiling; $m++) {
+        $url = "https://github.com/$owner/$stem-v$m"
+        if (Test-RepoExists $url) {
+            Write-Host "  [discovery] HEAD $url ... HIT"
+            $effective = $m
+        } else {
+            Write-Host "  [discovery] HEAD $url ... MISS (fail-fast)"
+            break
+        }
+    }
+
+    if ($effective -eq $baseline) {
+        Write-Host "  [discovery] no higher version found; using baseline -v$baseline"
+        return $repo
+    }
+
+    Write-Host "  [discovery] effective: $owner/$stem-v$effective (was -v$baseline)"
+    return "$owner/$stem-v$effective"
+}
+
+function Invoke-DelegatedFullInstaller([string]$effectiveRepo) {
+    $delegatedUrl = "https://raw.githubusercontent.com/$effectiveRepo/main/gitmap/scripts/install.ps1"
+    Write-Host "  [discovery] delegating to $delegatedUrl"
+
+    $env:INSTALLER_DELEGATED = "1"
+    try {
+        $script = (Invoke-WebRequest -Uri $delegatedUrl -UseBasicParsing -TimeoutSec 15).Content
+    } catch {
+        Write-Host "  [discovery] [WARN] could not fetch delegated installer: $_" -ForegroundColor Yellow
+        Write-Host "  [discovery] falling back to baseline installer" -ForegroundColor Yellow
+        Remove-Item Env:INSTALLER_DELEGATED -ErrorAction SilentlyContinue
+        return $false
+    }
+
+    $block = [ScriptBlock]::Create($script)
+    $passArgs = @{ ProbeCeiling = $ProbeCeiling }
+    if (-not [string]::IsNullOrWhiteSpace($Version))    { $passArgs.Version    = $Version }
+    if (-not [string]::IsNullOrWhiteSpace($InstallDir)) { $passArgs.InstallDir = $InstallDir }
+    if (-not [string]::IsNullOrWhiteSpace($Arch))       { $passArgs.Arch       = $Arch }
+    if ($NoPath)    { $passArgs.NoPath    = $true }
+    if ($Uninstall) { $passArgs.Uninstall = $true }
+
+    & $block @passArgs
+    return $true
+}
+
+if ($env:INSTALLER_DELEGATED -eq "1") {
+    Write-Host "  [discovery] INSTALLER_DELEGATED=1; skipping discovery (loop guard)"
+} elseif ($NoDiscovery) {
+    Write-Host "  [discovery] -NoDiscovery set; skipping probe"
+} else {
+    $effective = Resolve-EffectiveRepo $Repo $ProbeCeiling
+    if ($effective -ne $Repo) {
+        if (Invoke-DelegatedFullInstaller $effective) { return }
+    }
+}
+
+
 
 # --- Logging helpers ---
 
