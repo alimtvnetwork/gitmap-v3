@@ -618,17 +618,29 @@ register_on_path() {
 
     local marker_open="# gitmap shell wrapper v2 - managed by run.sh. Do not edit manually."
     local marker_close="# gitmap shell wrapper v2 end"
-    local snippet
-    if [[ "$shell_name" == "fish" ]]; then
-        snippet="${marker_open}
+
+    # Single-source-of-truth: ask the freshly-built gitmap binary for the
+    # canonical snippet bytes. Falls back to an inline heredoc only if
+    # the binary is unreachable (first-run before deploy completed).
+    local snippet=""
+    local snippet_shell="$shell_name"
+    case "$snippet_shell" in bash|zsh|fish) ;; *) snippet_shell="bash" ;; esac
+    if [[ -n "${BINARY_PATH:-}" ]] && [[ -x "${BINARY_PATH}" ]]; then
+        snippet="$("${BINARY_PATH}" setup print-path-snippet \
+            --shell "$snippet_shell" --dir "$resolved" --manager "run.sh" 2>/dev/null || true)"
+    fi
+    if [[ -z "$snippet" ]]; then
+        if [[ "$shell_name" == "fish" ]]; then
+            snippet="${marker_open}
 set -gx GITMAP_WRAPPER 1
 fish_add_path ${resolved}
 ${marker_close}"
-    else
-        snippet="${marker_open}
+        else
+            snippet="${marker_open}
 export GITMAP_WRAPPER=1
 case \":\${PATH}:\" in *\":${resolved}:\"*) ;; *) export PATH=\"\$PATH:${resolved}\" ;; esac
 ${marker_close}"
+        fi
     fi
 
     local profile written=0
