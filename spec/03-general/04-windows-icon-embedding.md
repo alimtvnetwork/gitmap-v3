@@ -125,7 +125,8 @@ Add before the `go build` step:
 
 ```powershell
 # Step 2b/4: Generate Windows resources (icon + version info)
-$winresJson = Join-Path $ProjectDir "winres" "winres.json"
+$winresDir = Join-Path $ProjectDir "winres"
+$winresJson = Join-Path $winresDir "winres.json"
 if (Test-Path $winresJson) {
     $goWinres = Get-Command go-winres -ErrorAction SilentlyContinue
     if ($goWinres) {
