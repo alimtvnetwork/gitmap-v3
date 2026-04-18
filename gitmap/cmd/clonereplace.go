@@ -105,7 +105,7 @@ func emptyDirContents(dir string) error {
 		return fmt.Errorf("read dir: %w", err)
 	}
 
-	fmt.Printf(constants.MsgCloneReplaceEmptying, dir, len(entries))
+	fmt.Printf(constants.MsgCloneReplaceEmptying, len(entries), dir)
 
 	var failures []string
 
