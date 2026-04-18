@@ -14,6 +14,15 @@ import (
 
 // runSetup handles the "setup" subcommand.
 func runSetup(args []string) {
+	// Subcommand: `gitmap setup print-path-snippet ...`
+	// Used by run.sh + install.sh to fetch the canonical marker-block
+	// snippet so all three drivers emit byte-identical output.
+	if len(args) > 0 && args[0] == "print-path-snippet" {
+		runPrintPathSnippet(args[1:])
+
+		return
+	}
+
 	checkHelp("setup", args)
 	configPath, dryRun, hasConfig := parseSetupFlags(args)
 	configPath = resolveSetupConfigPath(configPath, hasConfig)
