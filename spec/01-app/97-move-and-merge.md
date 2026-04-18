@@ -370,17 +370,32 @@ Per-file conflict resolutions in `merge-*` are logged as
 
 ## Acceptance Checklist
 
-- [ ] `gitmap mv folder-a folder-b` moves contents and deletes folder-a.
-- [ ] `gitmap mv folder url` clones url, copies files, commits + pushes.
-- [ ] `gitmap mv url folder` clones url, copies files into folder, deletes the cloned working folder.
-- [ ] `gitmap mv url-a url-b` clones both, copies, pushes RIGHT, deletes LEFT clone.
-- [ ] `merge-both` copies missing files both ways and prompts on conflicts.
-- [ ] `merge-left` only writes into LEFT.
-- [ ] `merge-right` only writes into RIGHT.
-- [ ] Conflict prompt accepts L/R/S/A/B/Q with the documented effects.
-- [ ] `-y` / `-a` bypasses prompts using the per-command source-side default.
-- [ ] `--prefer-left` / `--prefer-right` / `--prefer-newer` / `--prefer-skip` override the bypass default.
-- [ ] `--dry-run` prints all actions and writes nothing.
-- [ ] `--no-push` and `--no-commit` are honoured for URL endpoints.
-- [ ] `:branch` suffix on a URL pins the checkout + push branch.
-- [ ] Same-folder and nested-folder protection trips before any file write.
+- [x] `gitmap mv folder-a folder-b` moves contents and deletes folder-a.
+- [x] `gitmap mv folder url` clones url, copies files, commits + pushes.
+- [x] `gitmap mv url folder` clones url, copies files into folder, deletes the cloned working folder.
+- [x] `gitmap mv url-a url-b` clones both, copies, pushes RIGHT, deletes LEFT clone.
+- [x] `merge-both` copies missing files both ways and prompts on conflicts.
+- [x] `merge-left` only writes into LEFT.
+- [x] `merge-right` only writes into RIGHT.
+- [x] Conflict prompt accepts L/R/S/A/B/Q with the documented effects.
+- [x] `-y` / `-a` bypasses prompts using the per-command source-side default.
+- [x] `--prefer-left` / `--prefer-right` / `--prefer-newer` / `--prefer-skip` override the bypass default.
+- [x] `--dry-run` prints all actions and writes nothing.
+- [x] `--no-push` and `--no-commit` are honoured for URL endpoints.
+- [x] `:branch` suffix on a URL pins the checkout + push branch.
+- [x] Same-folder and nested-folder protection trips before any file write.
+
+---
+
+## Implementation Notes (v2.96.0)
+
+Implementation lives in `gitmap/movemerge/` (endpoint resolution,
+copy, diff, conflict prompt, git push) and `gitmap/cmd/move.go` +
+`gitmap/cmd/merge.go` (CLI entry + flag parsing). All four commands
+share `parseMoveMergeArgs` in `gitmap/cmd/movemergeflags.go` and the
+`movemerge.Run(command, left, right, opts)` orchestrator. Dispatch
+is wired through `gitmap/cmd/dispatchmovemerge.go`.
+
+Branch-creation-on-push (when `:branch` does not yet exist on the
+remote) is handled inside `gitPush`, which uses `--set-upstream
+origin <branch>` whenever the Endpoint carries a Branch value.

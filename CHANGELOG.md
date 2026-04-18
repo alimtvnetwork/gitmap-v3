@@ -1,5 +1,23 @@
 # Changelog
 
+## v2.96.0 — (2026-04-18)
+
+> Note: user requested `v2.94.0`, but `v2.95.0` already shipped (PATH-snippet single-source-of-truth refactor). Bumped to `v2.96.0` per the project's "minor bump on every code change" rule.
+
+### Added
+
+- `gitmap mv` / `gitmap move` — moves the contents of LEFT into RIGHT and deletes LEFT. Either endpoint can be a local folder or a remote git URL (with optional `:branch` suffix). URL endpoints are auto-cloned (or re-pulled if the working folder already matches) and committed + pushed after the copy.
+- `gitmap merge-both` / `gitmap merge-left` / `gitmap merge-right` — file-level merge between two endpoints. Missing files are copied; conflicts (paths present on both sides with different content) trigger an interactive prompt with `[L]eft / [R]ight / [S]kip / [A]ll-left / [B]all-right / [Q]uit` keys.
+- `-y` / `--yes` / `-a` / `--accept-all` — bypass the conflict prompt with the per-command source-side default (`merge-right` -> LEFT wins, `merge-left` -> RIGHT wins, `merge-both` -> newer mtime wins, `mv` -> LEFT wins).
+- `--prefer-left` / `--prefer-right` / `--prefer-newer` / `--prefer-skip` — explicit conflict resolution policies that override the bypass default.
+- `--no-push` / `--no-commit` / `--force-folder` / `--pull` / `--init` / `--dry-run` / `--include-vcs` / `--include-node-modules` for the move/merge family.
+- Structured `[mv]` / `[merge-both]` / `[merge-left]` / `[merge-right]` log prefixes on stderr.
+- `gitmap/movemerge` package: `Endpoint` resolver (URL vs folder + `:branch`), `CopyTree`, `DiffTrees`, `ConflictResolver`, and the four operation orchestrators. Unit tests cover endpoint classification (HTTPS/SSH ± branch), normalisation, and conflict-resolver bypass + sticky All-Left mode.
+
+### Spec
+
+- `spec/01-app/97-move-and-merge.md` Acceptance Checklist now ticked through item 8 (`-y` / `-a` bypass + `--prefer-*` overrides).
+
 ## v2.95.0 — (2026-04-18)
 
 ### Added
