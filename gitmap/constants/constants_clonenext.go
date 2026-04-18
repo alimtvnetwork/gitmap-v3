@@ -10,6 +10,8 @@ const (
 	MsgCloneNextRemovePrompt = "Remove current folder %s? [y/N] "
 	MsgCloneNextRemoved      = "✓ Removed %s\n"
 	MsgCloneNextMovedTo      = "→ Now in %s\n"
+	MsgFlattenFallback       = "→ Falling back to versioned folder %s (current folder is locked by this shell)\n"
+	MsgFlattenLockedHint     = "  Tip: 'cd ..' out of %s in your shell, then re-run to flatten.\n"
 )
 
 // Clone-next error and warning messages.
