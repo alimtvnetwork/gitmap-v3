@@ -746,6 +746,9 @@ function Deploy-Binary {
     Write-Success "Deployed to $appDir"
     Write-Info "Ensure $appDir is on your PATH to run: gitmap"
 
+    # Install drive-root forwarding shim (e.g. E:\gitmap.exe -> E:\bin-run\gitmap\gitmap.exe)
+    Install-RootShim -DeployTarget $target -RealBinary $destFile -BinaryName $Config.binaryName
+
     # Sync source repo path in DB so "gitmap update" uses this repo location
     $syncBinary = $destFile
     if (-not (Test-Path $syncBinary)) { $syncBinary = $BinaryPath }
@@ -756,6 +759,75 @@ function Deploy-Binary {
         } catch {
             Write-Warn "Could not sync source repo path: $_"
         }
+    }
+}
+
+# -- Install drive-root forwarding shim ------------------------
+# Builds <drive>:\gitmap.exe (or named binary) that forwards to the real
+# binary inside <deployPath>\gitmap\. The shim path is baked in via -ldflags.
+# Skipped on non-Windows or when the deploy target has no drive letter.
+function Install-RootShim {
+    param(
+        [string]$DeployTarget,
+        [string]$RealBinary,
+        [string]$BinaryName
+    )
+
+    $drive = [System.IO.Path]::GetPathRoot($DeployTarget)
+    if ([string]::IsNullOrWhiteSpace($drive) -or $drive -notmatch '^[A-Za-z]:\\$') {
+        Write-Info "Root shim: skipped (deploy target has no drive root: $DeployTarget)"
+        return
+    }
+
+    $shimSource = Join-Path $GitMapDir "scripts\shim"
+    if (-not (Test-Path (Join-Path $shimSource "main.go"))) {
+        Write-Warn "Root shim: source not found at $shimSource; skipping"
+        return
+    }
+
+    $shimDest = Join-Path $drive $BinaryName
+    Write-Info "Root shim: building $shimDest -> $RealBinary"
+
+    # Skip rebuild if shim is newer than its target (cheap idempotency).
+    if (Test-Path $shimDest) {
+        $shimAge = (Get-Item $shimDest).LastWriteTimeUtc
+        $realAge = (Get-Item $RealBinary).LastWriteTimeUtc
+        if ($shimAge -ge $realAge) {
+            Write-Info "Root shim: already up to date ($shimDest)"
+            return
+        }
+    }
+
+    # Bake the absolute target path into the shim binary.
+    $escapedTarget = $RealBinary -replace '\\', '\\'
+    $ldflags = "-s -w -X main.target=$escapedTarget"
+
+    Push-Location $GitMapDir
+    try {
+        $prevEAP = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        try {
+            $shimOutput = & go build -ldflags $ldflags -o $shimDest ./scripts/shim 2>&1
+            $shimExit = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $prevEAP
+        }
+
+        if ($shimExit -ne 0) {
+            Write-Warn "Root shim: build failed (exit $shimExit); skipping"
+            foreach ($line in $shimOutput) {
+                $text = "$line".Trim()
+                if ($text.Length -gt 0) { Write-Host "  $text" -ForegroundColor Yellow }
+            }
+            return
+        }
+    } finally {
+        Pop-Location
+    }
+
+    if (Test-Path $shimDest) {
+        $size = (Get-Item $shimDest).Length / 1KB
+        Write-Success ("Root shim installed: {0} ({1:N1} KB)" -f $shimDest, $size)
     }
 }
 
