@@ -37,6 +37,7 @@ set -euo pipefail
 REPO="alimtvnetwork/gitmap-v3"
 BINARY_NAME="gitmap"
 TMP_DIR=""
+APP_DIR=""
 PATH_SHELL=""
 PATH_TARGET=""
 PATH_LINE=""
