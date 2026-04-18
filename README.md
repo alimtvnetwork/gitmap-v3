@@ -22,7 +22,21 @@ _Scan, catalog, clone, and manage all your Git repositories from a single CLI._
 
 ## Quick Start
 
-### Install
+### Install — Quick (pick your install folder)
+
+Prompts for the install drive/folder (press Enter for the default), then runs the full installer.
+
+```powershell
+# Windows (PowerShell) — interactive, choose drive/folder
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/install-quick.ps1 | iex
+```
+
+```bash
+# Linux / macOS — interactive, choose folder
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/install-quick.sh | bash
+```
+
+### Install — Full (defaults, no prompt)
 
 ```powershell
 # Windows (PowerShell)
@@ -55,6 +69,18 @@ Every command supports `--help` or `-h` for detailed usage with examples.
 ## Installation
 
 ### One-Liner Install (recommended)
+
+**Quick installers — prompt for an install folder, then delegate to the full installer:**
+
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/install-quick.ps1 | iex
+```
+
+```bash
+# Linux / macOS
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/install-quick.sh | bash
+```
 
 **Windows (PowerShell — full bootstrap, works on any machine):**
 
