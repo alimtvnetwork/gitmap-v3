@@ -9,6 +9,7 @@ None
 ## Usage
 
     gitmap setup [--config <path>] [--dry-run]
+    gitmap setup print-path-snippet --shell <bash|zsh|fish|pwsh> --dir <path> [--manager <label>]
 
 ## Flags
 
@@ -16,6 +17,23 @@ None
 |------|---------|-------------|
 | --config \<path\> | data/git-setup.json beside gitmap | Path to git-setup.json config file |
 | --dry-run | false | Preview changes without applying them |
+
+## Subcommand: `print-path-snippet`
+
+Emits the canonical marker-block PATH snippet to stdout. `run.sh` and
+`gitmap/scripts/install.sh` shell out to this command so all three
+drivers produce **byte-identical** rc-file output. Single source of
+truth lives in `gitmap/constants/constants_pathsnippet.go`.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| --shell \<sh\> | bash | Target shell: bash, zsh, fish, or pwsh |
+| --dir \<path\> | _(required)_ | Directory to inject into the snippet's PATH line |
+| --manager \<label\> | gitmap setup | Header label; different managers can coexist in one rc-file |
+
+Example:
+
+    gitmap setup print-path-snippet --shell zsh --dir ~/.local/bin/gitmap >> ~/.zshrc
 
 ## Prerequisites
 
