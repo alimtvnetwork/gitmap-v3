@@ -87,7 +87,10 @@ func repoNameFromURL(url string) string {
 // executeDirectClone clones a single repo from a direct URL.
 // When no folder name is given, versioned URLs are auto-flattened
 // (e.g., wp-onboarding-v13 clones into wp-onboarding/).
-func executeDirectClone(url, folderName string, ghDesktopFlag bool) {
+// By default, an existing target folder is replaced via the two-strategy
+// flow in spec/01-app/96-clone-replace-existing-folder.md. Pass noReplace=true
+// to restore the strict abort-on-exists behaviour.
+func executeDirectClone(url, folderName string, ghDesktopFlag, noReplace bool) {
 	repoName := repoNameFromURL(url)
 	if len(folderName) == 0 {
 		parsed := clonenext.ParseRepoName(repoName)
@@ -104,10 +107,12 @@ func executeDirectClone(url, folderName string, ghDesktopFlag bool) {
 		absPath = folderName
 	}
 
-	// Check if target folder already exists.
-	if _, statErr := os.Stat(absPath); statErr == nil {
-		fmt.Fprintf(os.Stderr, constants.ErrCloneURLExists, absPath)
-		os.Exit(1)
+	// Strict mode: keep the original abort-on-exists behaviour.
+	if noReplace {
+		if _, statErr := os.Stat(absPath); statErr == nil {
+			fmt.Fprintf(os.Stderr, constants.ErrCloneURLExists, absPath)
+			os.Exit(1)
+		}
 	}
 
 	// Enqueue pending task.
@@ -118,16 +123,21 @@ func executeDirectClone(url, folderName string, ghDesktopFlag bool) {
 		defer taskDB.Close()
 	}
 
-	// Clone.
+	// Clone (default: replace; with --no-replace: clone into a guaranteed-empty target).
 	fmt.Printf(constants.MsgCloneURLCloning, repoName, folderName)
-	cmd := exec.Command(constants.GitBin, constants.GitClone, url, absPath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cloneErr := cmd.Run()
-	if cloneErr != nil {
-		failPendingTask(taskDB, taskID, fmt.Sprintf(constants.ErrCloneURLFailed, url, cloneErr))
-		fmt.Fprintf(os.Stderr, constants.ErrCloneURLFailed, url, cloneErr)
-		os.Exit(1)
+
+	if noReplace {
+		if cloneErr := runCloneCommand(url, absPath); cloneErr != nil {
+			failPendingTask(taskDB, taskID, fmt.Sprintf(constants.ErrCloneURLFailed, url, cloneErr))
+			fmt.Fprintf(os.Stderr, constants.ErrCloneURLFailed, url, cloneErr)
+			os.Exit(1)
+		}
+	} else {
+		if _, replaceErr := cloneReplacing(url, absPath); replaceErr != nil {
+			failPendingTask(taskDB, taskID, fmt.Sprintf(constants.ErrCloneURLFailed, url, replaceErr))
+			fmt.Fprintf(os.Stderr, constants.ErrCloneURLFailed, url, replaceErr)
+			os.Exit(1)
+		}
 	}
 
 	fmt.Printf(constants.MsgCloneURLDone, repoName)
