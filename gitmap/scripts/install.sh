@@ -586,6 +586,8 @@ parse_args() {
     INSTALL_DIR=""
     ARCH_FLAG=""
     NO_PATH=false
+    NO_DISCOVERY=false
+    PROBE_CEILING=30
 
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -605,14 +607,24 @@ parse_args() {
                 NO_PATH=true
                 shift
                 ;;
+            --no-discovery)
+                NO_DISCOVERY=true
+                shift
+                ;;
+            --probe-ceiling)
+                PROBE_CEILING="$2"
+                shift 2
+                ;;
             --help|-h)
-                echo "Usage: install.sh [--version <tag>] [--dir <path>] [--arch <arch>] [--no-path]"
+                echo "Usage: install.sh [--version <tag>] [--dir <path>] [--arch <arch>] [--no-path] [--no-discovery] [--probe-ceiling <N>]"
                 echo ""
                 echo "Options:"
-                echo "  --version <tag>   Install a specific version (e.g. v2.55.0)"
-                echo "  --dir <path>      Target directory (default: ~/.local/bin)"
-                echo "  --arch <arch>     Force architecture: amd64, arm64 (default: auto)"
-                echo "  --no-path         Skip adding install directory to PATH"
+                echo "  --version <tag>        Install a specific version (e.g. v2.55.0)"
+                echo "  --dir <path>           Target directory (default: ~/.local/bin)"
+                echo "  --arch <arch>          Force architecture: amd64, arm64 (default: auto)"
+                echo "  --no-path              Skip adding install directory to PATH"
+                echo "  --no-discovery         Skip versioned-repo discovery (install baseline)"
+                echo "  --probe-ceiling <N>    Highest -v<N> to probe (default: 30)"
                 exit 0
                 ;;
             *)
@@ -633,6 +645,19 @@ main() {
     echo ""
 
     parse_args "$@"
+
+    # Versioned repo discovery: re-exec from the latest -v<M> sibling repo.
+    if [ "${INSTALLER_DELEGATED:-0}" = "1" ]; then
+        printf '  [discovery] INSTALLER_DELEGATED=1; skipping discovery (loop guard)\n' >&2
+    elif [ "${NO_DISCOVERY}" = "true" ]; then
+        printf '  [discovery] --no-discovery set; skipping probe\n' >&2
+    else
+        local effective_repo
+        effective_repo="$(resolve_effective_repo "${REPO}" "${PROBE_CEILING}")"
+        if [ "${effective_repo}" != "${REPO}" ]; then
+            invoke_delegated_full_installer "${effective_repo}" "$@" || true
+        fi
+    fi
 
     local os arch version install_dir archive_path
 
