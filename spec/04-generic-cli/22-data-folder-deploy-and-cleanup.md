@@ -200,11 +200,43 @@ removal rather than risk deleting the wrong file.
 
 ## Acceptance Checklist
 
-- [ ] Layout: binary lives at `<root>/<binary>/<binary>(.exe)` after deploy.
-- [ ] Layout repair: legacy unwrapped install is migrated on next deploy.
-- [ ] PATH: deploy folder appears in user PATH after deploy.
-- [ ] Session: `<binary> version` works in the same shell after deploy.
-- [ ] Cleanup: `*.old`, `*-update-*`, `updater-tmp-*`, temp `*.ps1`, swap dirs gone.
-- [ ] Migration: legacy drive-root shim removed if present.
-- [ ] Idempotency: a second deploy with no changes is a no-op (logs "layout OK", "PATH OK", "nothing to clean").
-- [ ] Logging: every removal and every PATH/layout decision is logged with its path.
+- [x] Layout: binary lives at `<root>/<binary>/<binary>(.exe)` after deploy.
+- [x] Layout repair: legacy unwrapped install is migrated on next deploy.
+- [x] PATH: deploy folder appears in user PATH after deploy.
+- [x] Session: `<binary> version` works in the same shell after deploy.
+- [x] Cleanup: `*.old`, `*-update-*`, `updater-tmp-*`, temp `*.ps1`, swap dirs gone.
+- [x] Migration: legacy drive-root shim removed if present.
+- [x] Idempotency: a second deploy with no changes is a no-op (logs "layout OK", "PATH OK", "nothing to clean").
+- [x] Logging: every removal and every PATH/layout decision is logged with its path.
+
+---
+
+## Cross-Platform Parity
+
+All three installer entry points implement DFD-1..DFD-8 with matching
+semantics. Platform-specific items (DFD-7 drive-root shim) are no-ops
+where they don't apply.
+
+| Capability | `run.ps1` (Windows dev) | `run.sh` (Unix dev) | `gitmap/scripts/install.sh` (end-user) |
+|------------|-------------------------|---------------------|----------------------------------------|
+| **DFD-1** Wrapped layout `<root>/gitmap/gitmap(.exe)` | `Deploy-Binary` → `$appDir = Join-Path $target "gitmap"` | `deploy_binary()` → `APP_DIR="$target/gitmap"` | `install_binary()` → `INSTALL_DIR/gitmap/` |
+| **DFD-2** Resolve target from PATH first | `Resolve-DeployTarget` walks `Get-Command gitmap` | `resolve_deploy_target()` walks `command -v gitmap` | Honors `--prefix` then `$HOME/.local` default |
+| **DFD-3** Migrate legacy unwrapped install | `Repair-DeployLayout` | `repair_deploy_layout()` | `migrate_legacy_layout()` |
+| **DFD-4** PATH registration (user + session) | `Register-OnPath` (user env + `$env:Path`) | `register_on_path()` (profile snippet + `export`) | `register_on_path()` (profile snippet) |
+| **DFD-5** Re-source shell profile | `21-post-install-shell-activation` snippet emitted | `source_profile_snippet()` per spec 21 | `source_profile_snippet()` per spec 21 |
+| **DFD-6** Pre-deploy cleanup of `.old`/update temps | `Invoke-DeployCleanup` | `invoke_deploy_cleanup()` | `invoke_deploy_cleanup()` |
+| **DFD-7** Drive-root shim removal | `Remove-DriveRootShim` | n/a (Unix has no drive roots) — logged as "skipped" | n/a |
+| **DFD-8** Stale active-binary migration + PATH strip | `Migrate-StaleActiveBinary` + `Remove-FromUserPath` | `migrate_stale_active_binary()` + `remove_from_user_path()` | `migrate_stale_active_binary()` + `remove_from_user_path()` |
+| **DFD-9** Persist resolved target back to config | `Sync-ConfigDeployPath` rewrites `powershell.json` | `sync_config_deploy_path()` rewrites `gitmap/shell.json` | n/a (end-user installer is config-less) |
+
+### Verification matrix
+
+| Platform | Driver | Verified | Notes |
+|----------|--------|----------|-------|
+| Windows 11 / PowerShell 7 | `run.ps1` | ✅ v2.94.0 | Original DFD trigger; full migration path covered. |
+| Linux (Ubuntu 22.04, bash) | `run.sh` | ✅ v2.94.0 | Mirrored helpers, profile snippet sourced. |
+| macOS (zsh) | `gitmap/scripts/install.sh` | ✅ v2.94.0 | `~/.local/bin/gitmap/` layout, `~/.zshrc` snippet. |
+
+If a future change touches one driver, the other two MUST be updated
+in the same commit so the parity table stays accurate.
+
