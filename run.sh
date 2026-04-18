@@ -742,7 +742,9 @@ deploy_binary() {
     copy_docs_site "$app_dir"
 
     write_success "Deployed to $app_dir"
-    write_info "Ensure $app_dir is on your PATH to run: gitmap"
+
+    # Register on user PATH and refresh current session (DFD-4, DFD-5).
+    register_on_path "$app_dir"
 
     DEPLOYED_BINARY_PATH="$dest_file"
 }
